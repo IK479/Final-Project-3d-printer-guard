@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Monitoring Service - System Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007bff",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-full min-h-screen w-full flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl">monitoring</span>
+</div>
+<h2 class="text-lg font-bold tracking-tight">AI Monitoring Service</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Logs</a>
+<a class="text-sm font-medium text-primary" href="#">Settings</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-xl">account_circle</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary/20 border border-primary/50 overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Avatar placeholder with a soft gradient circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARTxX3lZKK4cYNksFNEhZ4_TFxqa3tw1ETOWlvIbVRErIbcb3miahExSFpcPNHab9RY7Cmw-Ovz8o1U-X9i8mU_gaGrwQ7JZ2yvk2AKbnyoBOiVWZOLQBejhjHCIESAuA7u_Wv6w-UcsAuxrp91hiO7kH-MF35hoTGYPnSPhR5_vmIlx0cRhUMiqqCYrTIcUSM_20v0BP50qE8CBxQFRpOUkZK8Z0b9bbV5g1KxCxW-AjOyX7g6J0Ev_eObWCtlv7eLj6xMmr0Qw"/>
+</div>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 p-6 hidden lg:flex flex-col gap-2">
+<div class="mb-4 px-2">
+<h1 class="text-lg font-bold">System Settings</h1>
+<p class="text-slate-500 text-xs">Manage AI monitoring parameters</p>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#general">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">settings</span>
+<span class="text-sm font-medium">General</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary transition-colors border-l-2 border-primary" href="#capture">
+<span class="material-symbols-outlined">videocam</span>
+<span class="text-sm font-medium">Capture Service</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#ai-model">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">psychology</span>
+<span class="text-sm font-medium">AI Model</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#notifications">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">mail</span>
+<span class="text-sm font-medium">Notifications</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#storage">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">database</span>
+<span class="text-sm font-medium">Storage &amp; Database</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#api">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">key</span>
+<span class="text-sm font-medium">API Keys</span>
+</a>
+</aside>
+<!-- Settings Content -->
+<div class="flex-1 overflow-y-auto p-6 md:p-10 bg-slate-50/50 dark:bg-background-dark">
+<div class="max-w-4xl mx-auto space-y-12">
+<!-- Header -->
+<section>
+<h2 class="text-4xl font-black tracking-tight mb-2">System Settings</h2>
+<p class="text-slate-500">Configure your monitoring service parameters, AI sensitivity, and third-party integrations.</p>
+</section>
+<!-- Capture Service Section -->
+<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm" id="capture">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">videocam</span>
+<h3 class="text-xl font-bold">Capture Service</h3>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-sm font-semibold">Camera Device</label>
+<select class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all appearance-none">
+<option>Intel RealSense D435 (ID: 0x48a)</option>
+<option>Sony IMX Global Shutter (ID: 0x221)</option>
+<option>Standard USB WebCam</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-semibold">FPS Limit</label>
+<input class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" type="number" value="30"/>
+</div>
+<div class="space-y-2 col-span-full">
+<label class="text-sm font-semibold">Resolution Settings</label>
+<div class="grid grid-cols-2 gap-4">
+<select class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none transition-all appearance-none">
+<option>1920 x 1080 (1080p)</option>
+<option>1280 x 720 (720p)</option>
+<option>640 x 480 (VGA)</option>
+</select>
+<select class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none transition-all appearance-none">
+<option>Aspect Ratio: 16:9</option>
+<option>Aspect Ratio: 4:3</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Model Configuration -->
+<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm" id="ai-model">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">psychology</span>
+<h3 class="text-xl font-bold">AI Model Configuration</h3>
+</div>
+<div class="p-6 space-y-6">
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="text-sm font-semibold">Confidence Alert Threshold (85%)</label>
+<span class="text-primary font-bold">85%</span>
+</div>
+<input class="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary" max="100" min="0" type="range" value="85"/>
+</div>
+<div class="space-y-4">
+<label class="text-sm font-semibold">Detected Defect Toggles</label>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<label class="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
+<span class="text-sm">Surface Scratches</span>
+<input checked="" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
+<span class="text-sm">Dimensional Deviation</span>
+<input checked="" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
+<span class="text-sm">Color Misalignment</span>
+<input class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
+<span class="text-sm">Edge Cracks</span>
+<input checked="" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- Notifications -->
+<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm" id="notifications">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">notifications_active</span>
+<h3 class="text-xl font-bold">Notification Integrations</h3>
+</div>
+<div class="p-6 space-y-6">
+<div class="space-y-2">
+<label class="text-sm font-semibold">Custom Webhook URL</label>
+<input class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="https://api.yourdomain.com/webhooks/alerts" type="url"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-sm font-semibold">Slack/Discord Channel Hook</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">link</span>
+<input class="w-full h-12 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="https://hooks.slack.com/services/..." type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-semibold">Email Alerts</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">email</span>
+<input class="w-full h-12 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="alerts@manufacturing.co" type="email"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Storage & Database -->
+<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm" id="storage">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">database</span>
+<h3 class="text-xl font-bold">Storage &amp; Database</h3>
+</div>
+<div class="p-6 space-y-6">
+<div class="space-y-2">
+<label class="text-sm font-semibold">SQLite Database Path</label>
+<div class="flex gap-2">
+<input class="flex-1 h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed" readonly="" type="text" value="/var/lib/ai-monitor/service.db"/>
+<button class="px-4 h-12 bg-slate-200 dark:bg-slate-700 rounded-lg text-sm font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Browse</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-sm font-semibold">Image Storage Limit (GB)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" type="number" value="500"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-semibold">Auto-Purge Cycles</label>
+<select class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all appearance-none">
+<option>Purge older than 30 days</option>
+<option>Purge older than 90 days</option>
+<option>Never purge (Manual)</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+<!-- API Key Management -->
+<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm mb-12" id="api">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">key</span>
+<h3 class="text-xl font-bold">API Key Management</h3>
+</div>
+<button class="text-sm font-bold text-primary hover:underline">+ Generate New Key</button>
+</div>
+<div class="p-6 space-y-4">
+<div class="flex items-center justify-between p-4 rounded-lg bg-slate-100 dark:bg-slate-800/40 border border-dashed border-slate-300 dark:border-slate-700">
+<div class="flex flex-col">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-500">REST API ACCESS</span>
+<code class="text-sm font-mono mt-1">ai_rest_92kL...88xp1</code>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"><span class="material-symbols-outlined text-xl">content_copy</span></button>
+<button class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 rounded transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 rounded-lg bg-slate-100 dark:bg-slate-800/40 border border-dashed border-slate-300 dark:border-slate-700">
+<div class="flex flex-col">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-500">WEBSOCKET STREAMING</span>
+<code class="text-sm font-mono mt-1">ai_ws_77zB...21qx9</code>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"><span class="material-symbols-outlined text-xl">content_copy</span></button>
+<button class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 rounded transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-4 pb-20">
+<button class="px-8 h-12 rounded-lg border border-slate-300 dark:border-slate-700 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            Reset to Default
+                        </button>
+<button class="px-8 h-12 rounded-lg bg-primary text-white text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                            Save Configuration
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
