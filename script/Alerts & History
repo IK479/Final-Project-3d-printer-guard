@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007bff",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-800 px-6 lg:px-10 py-3 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">monitoring</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] font-display">PrintGuard AI</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">Alerts &amp; History</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Printer Fleet</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<label class="hidden sm:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full overflow-hidden">
+<div class="text-slate-400 flex bg-slate-100 dark:bg-slate-800 items-center justify-center pl-3 border-none">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-0 placeholder:text-slate-500 text-sm font-normal px-3" placeholder="Search event ID..."/>
+</div>
+</label>
+<div class="relative">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full cursor-pointer">notifications</span>
+<div class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></div>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar circle" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC2RB9ByrZdJwx7d22IWcT6fpBX3DXLipfPp9EN2kRM4uwclsV6dW99WBeeiDwBDFQnB1aLOpuiF0vLYU71-TtLgqzLl749qstaZI_F2d7cz5ax5D8Tp-RScf3OA-qwo0OwnUh7l2R1_G-OjJlg0J4M_Tb28O9CQ_4nXHVnepvX2G33yk9t3d4j1J06vTvEMIF4fYoHXD3CkJA-oWxqZWPwgu__1BD-W_kb39ssacgyXgBSByOWwBv_tbZrtWKObYOt-gyCLdECDw");'></div>
+</div>
+</header>
+<main class="flex-1 px-4 lg:px-10 py-8 max-w-[1440px] mx-auto w-full">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Alerts &amp; History</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Review and manage AI-detected printing anomalies across your fleet.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm font-medium transition-colors">
+<span class="material-symbols-outlined text-sm">download</span>
+                            Export CSV
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium transition-colors">
+<span class="material-symbols-outlined text-sm">refresh</span>
+                            Refresh Data
+                        </button>
+</div>
+</div>
+<!-- Stats Overview Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="flex flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Total Sessions Today</p>
+<span class="material-symbols-outlined text-primary">precision_manufacturing</span>
+</div>
+<div class="flex items-baseline gap-3 mt-2">
+<p class="text-slate-900 dark:text-slate-100 text-3xl font-bold">12</p>
+<p class="text-emerald-500 text-sm font-semibold flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_upward</span> 2%
+                            </p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Total Alerts Triggered</p>
+<span class="material-symbols-outlined text-orange-500">warning</span>
+</div>
+<div class="flex items-baseline gap-3 mt-2">
+<p class="text-slate-900 dark:text-slate-100 text-3xl font-bold">48</p>
+<p class="text-red-500 text-sm font-semibold flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_upward</span> 15%
+                            </p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">AI Accuracy Rate</p>
+<span class="material-symbols-outlined text-emerald-500">verified</span>
+</div>
+<div class="flex items-baseline gap-3 mt-2">
+<p class="text-slate-900 dark:text-slate-100 text-3xl font-bold">99.4%</p>
+<p class="text-emerald-500 text-sm font-semibold flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_upward</span> 0.1%
+                            </p>
+</div>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold text-lg">Defect Type Distribution</h3>
+<button class="text-slate-400 hover:text-slate-100"><span class="material-symbols-outlined">more_horiz</span></button>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-8">
+<div class="relative size-48">
+<!-- Simulated Pie Chart with SVG -->
+<svg class="size-full transform -rotate-90" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#007bff" stroke-dasharray="150 251.2" stroke-width="12"></circle> <!-- Spaghetti 60% -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#f97316" stroke-dasharray="50 251.2" stroke-dashoffset="-150" stroke-width="12"></circle> <!-- Stringing 20% -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#ef4444" stroke-dasharray="30 251.2" stroke-dashoffset="-200" stroke-width="12"></circle> <!-- Detachment 12% -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#64748b" stroke-dasharray="21.2 251.2" stroke-dashoffset="-230" stroke-width="12"></circle> <!-- Other 8% -->
+</svg>
+</div>
+<div class="flex-1 flex flex-col gap-3 w-full">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-primary"></div>
+<span class="text-sm">Spaghetti</span>
+</div>
+<span class="text-sm font-bold">60%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-orange-500"></div>
+<span class="text-sm">Stringing</span>
+</div>
+<span class="text-sm font-bold">20%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-red-500"></div>
+<span class="text-sm">Detachment</span>
+</div>
+<span class="text-sm font-bold">12%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-slate-500"></div>
+<span class="text-sm">Other</span>
+</div>
+<span class="text-sm font-bold">8%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold text-lg">Detections per Hour</h3>
+<div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+<button class="px-2 py-1 text-xs font-medium rounded bg-white dark:bg-slate-700 shadow-sm">24h</button>
+<button class="px-2 py-1 text-xs font-medium rounded text-slate-500">7d</button>
+</div>
+</div>
+<div class="flex items-end justify-between h-48 gap-2 pt-4">
+<!-- Simulated Bar Chart -->
+<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 40%" title="08:00 - 4 events"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 60%" title="10:00 - 6 events"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 30%" title="12:00 - 3 events"></div>
+<div class="flex-1 bg-primary/40 hover:bg-primary transition-colors rounded-t-sm" style="height: 85%" title="14:00 - 12 events"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 20%" title="16:00 - 2 events"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 10%" title="18:00 - 1 event"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 45%" title="20:00 - 5 events"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 55%" title="22:00 - 7 events"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 35%" title="00:00 - 4 events"></div>
+</div>
+<div class="flex justify-between mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest px-1">
+<span>08:00</span>
+<span>12:00</span>
+<span>16:00</span>
+<span>20:00</span>
+<span>00:00</span>
+</div>
+</div>
+</div>
+<!-- Filter & Table Section -->
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden shadow-sm">
+<div class="p-4 lg:p-6 border-b border-slate-200 dark:border-slate-800">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<h3 class="font-bold text-lg">Detailed Event Log</h3>
+<div class="flex flex-wrap items-center gap-3">
+<div class="relative group">
+<select class="appearance-none bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 pl-4 pr-10 focus:ring-2 focus:ring-primary/50 cursor-pointer">
+<option>Defect Type: All</option>
+<option>Spaghetti</option>
+<option>Stringing</option>
+<option>Detachment</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">expand_more</span>
+</div>
+<div class="relative group">
+<select class="appearance-none bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 pl-4 pr-10 focus:ring-2 focus:ring-primary/50 cursor-pointer">
+<option>Confidence: 80%+</option>
+<option>Confidence: 90%+</option>
+<option>Confidence: 95%+</option>
+<option>All</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">expand_more</span>
+</div>
+<div class="relative group">
+<button class="bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 px-4 flex items-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                        Last 24 Hours
+                                    </button>
+</div>
+</div>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Timestamp</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Snapshot</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Defect Type</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Confidence</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Printer</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium">Oct 24, 2023</span>
+<span class="text-xs text-slate-500">14:23:12</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
+<div class="size-full bg-center bg-cover" data-alt="Microscopic snapshot of 3D print defect" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBGvmGhWpK8JjeH8nzq0jD6crtjYs2J-jnQiMuNUnIt23XQRmiBlwOi269-rGipsl6rjTdss0dOf32F5bAKVD20H8fmflxk_n8gG7qgBa2xIcXoUWogW69j7YSbBJ13AsSa1T10ccS28mRsqzcAVjBBNZEg6685pwp00HTgce3hVfO_Bw2n-rymhHicZColncYhazs-aRWJo618vQbZ6WbPAMl2g199v9g9sZyo1JZ_O8_v79G3JH7bB9oL0TuqAVVTFRz9wzGDqw');"></div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+                                            Spaghetti
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500" style="width: 98%"></div>
+</div>
+<span class="text-sm font-bold">98.2%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400">Ender-3 Pro V2</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium">Oct 24, 2023</span>
+<span class="text-xs text-slate-500">14:15:45</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
+<div class="size-full bg-center bg-cover" data-alt="Microscopic snapshot of 3D print defect" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCAqggbhuTVAQmfalIaTO5c-sCmnppqH1o7p_eMvSTn6zBXasKtWp1NSo3jymQSSRtJ_AdkLNO_cJkX-Vfn_I0o_wYUHAkXxtoP8YCoAokCEuGEZaFlm28qq5flngCFmtHlyVVj1-vAkSY5XDpOPjB_fkKhYImpxltO8gJj2A4hFOA7MpKczqtcdGvoe2QljfNw8YjiLXdg5WRaxPWSp3JU6sBU9S6vKGBmr7Cnj0nfUBDgkrxz98ZD0nVa-eV7zKVoC22yLhOQhg');"></div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                                            Stringing
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500" style="width: 89%"></div>
+</div>
+<span class="text-sm font-bold">89.5%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400">Bambu Lab X1C</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium">Oct 24, 2023</span>
+<span class="text-xs text-slate-500">13:50:22</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
+<div class="size-full bg-center bg-cover" data-alt="Microscopic snapshot of 3D print defect" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA0bauIENA3py9u3an-RGZQRdTSx2Pf8wom9kenJxrNPVkpN5ooXV1eLObj4hZxKu7AcbmeR1pMXJcNEjblPsevuioksqg91S03x40MTtk0kegXSZIRXHbdXxz743SDYbnqEuPhZjKFM6Ggt3lFDGu8ewGt7qypCIhJep65TRPLYdKUi-6vm2T1WsJjKxpmlxl-NHu1lvWq27aY-RDk9FqO0HnZ-rJt4wN3UUns_mEx3v5ErvPQL6JKNSy_lcl94hTwrbP78xFtjw');"></div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/20">
+                                            Detachment
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-yellow-500" style="width: 76%"></div>
+</div>
+<span class="text-sm font-bold">76.8%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400">Prusa MK4 #2</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium">Oct 24, 2023</span>
+<span class="text-xs text-slate-500">12:04:15</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
+<div class="size-full bg-center bg-cover" data-alt="Microscopic snapshot of 3D print defect" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCmJGZKhpY8OVBMIixQC-fPCPj8fogQWp9Ip_co-4wP5IhJ-mAq9pxFBFwqRpb_RoCD78OBIgRkAZ5XL5BkL0WFYHrD-_ew1kvsUtd-C9o96WaimytoLjHrJSx8uHFzhQX2OYKBt-Da-GgIASc3EajaH1seDAcgX-9SkQWRnCxEuv-MOLD9oWLUCjMWH4xVzABCCQnHECsO-p5OKlm3z_qzxDEFWqoBSzbtmqyqI9NBAa51mhgrZpbZ9gqszrKX4HxezRpsayj0Cw');"></div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+                                            Spaghetti
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500" style="width: 99%"></div>
+</div>
+<span class="text-sm font-bold">99.1%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400">Voron 2.4 Custom</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<span class="text-sm text-slate-500">Showing 1-10 of 48 events</span>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded disabled:opacity-50 text-sm font-medium">Previous</button>
+<button class="px-3 py-1 bg-primary text-white rounded text-sm font-medium">Next</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-auto border-t border-slate-200 dark:border-slate-800 px-10 py-6 text-center text-slate-500 text-sm">
+<p>© 2023 PrintGuard AI Monitoring System. All rights reserved.</p>
+</footer>
+</div>
+</div>
+</body></html>
