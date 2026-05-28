@@ -3,7 +3,9 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aegis Print Guard | System Config</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -11,384 +13,400 @@
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#007bff",
-                        "background-light": "#f5f7f8",
-                        "background-dark": "#0f1923",
+                    "colors": {
+                        "secondary-container": "#ee9800",
+                        "on-primary-fixed-variant": "#005236",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "tertiary": "#ffb3ad",
+                        "on-primary": "#003824",
+                        "inverse-on-surface": "#283044",
+                        "surface": "#0b1326",
+                        "on-surface": "#dae2fd",
+                        "primary-fixed": "#6ffbbe",
+                        "on-secondary": "#472a00",
+                        "on-tertiary-fixed": "#410004",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#bbcabf",
+                        "primary-container": "#10b981",
+                        "primary-fixed-dim": "#4edea3",
+                        "secondary": "#ffb95f",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "surface-bright": "#31394d",
+                        "surface-tint": "#4edea3",
+                        "surface-container-low": "#131b2e",
+                        "inverse-primary": "#006c49",
+                        "surface-container": "#171f33",
+                        "on-error-container": "#ffdad6",
+                        "surface-variant": "#2d3449",
+                        "tertiary-container": "#ff7a73",
+                        "on-tertiary-container": "#79000e",
+                        "on-background": "#dae2fd",
+                        "surface-container-high": "#222a3d",
+                        "secondary-fixed": "#ffddb8",
+                        "tertiary-fixed": "#ffdad7",
+                        "surface-container-lowest": "#060e20",
+                        "surface-container-highest": "#2d3449",
+                        "outline": "#86948a",
+                        "on-tertiary": "#68000a",
+                        "on-secondary-container": "#5b3800",
+                        "on-primary-container": "#00422b",
+                        "primary": "#4edea3",
+                        "outline-variant": "#3c4a42",
+                        "on-primary-fixed": "#002113",
+                        "surface-dim": "#0b1326",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-secondary-fixed": "#2a1700",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab"
                     },
-                    fontFamily: {
-                        "display": ["Inter"]
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
                     },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    "spacing": {
+                        "container-padding": "1.5rem",
+                        "video-ratio": "16/9",
+                        "gutter": "1rem",
+                        "widget-gap": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "status-badge": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "mono-label": ["JetBrains Mono"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "status-badge": ["11px", {"lineHeight": "12px", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "mono-label": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                    }
                 },
             },
         }
     </script>
 <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+            -webkit-font-smoothing: antialiased;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #3c4a42;
+            height: 4px;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #4edea3;
+            margin-top: -6px;
+            box-shadow: 0 0 8px rgba(78, 222, 163, 0.4);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #131b2e;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
-<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
-<div class="layout-container flex h-full grow flex-col">
-<!-- Top Navigation Bar -->
-<header class="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-800 px-6 lg:px-10 py-3 bg-background-light dark:bg-background-dark sticky top-0 z-50">
-<div class="flex items-center gap-8">
-<div class="flex items-center gap-4 text-primary">
-<div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
-<span class="material-symbols-outlined text-primary">monitoring</span>
+<body class="font-body-lg text-body-lg overflow-hidden">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface-container dark:bg-surface-container border-b border-outline-variant flex justify-between items-center px-gutter h-16">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md text-primary font-bold">Aegis Print Guard</span>
+<div class="h-6 w-px bg-outline-variant mx-2"></div>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">System Settings</span>
 </div>
-<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] font-display">PrintGuard AI</h2>
-</div>
-<nav class="hidden md:flex items-center gap-6">
-<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Dashboard</a>
-<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">Alerts &amp; History</a>
-<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Printer Fleet</a>
-<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium transition-colors" href="#">Settings</a>
-</nav>
-</div>
-<div class="flex flex-1 justify-end gap-4 items-center">
-<label class="hidden sm:flex flex-col min-w-40 h-10 max-w-64">
-<div class="flex w-full flex-1 items-stretch rounded-lg h-full overflow-hidden">
-<div class="text-slate-400 flex bg-slate-100 dark:bg-slate-800 items-center justify-center pl-3 border-none">
-<span class="material-symbols-outlined text-[20px]">search</span>
-</div>
-<input class="form-input flex w-full min-w-0 flex-1 border-none bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-0 placeholder:text-slate-500 text-sm font-normal px-3" placeholder="Search event ID..."/>
-</div>
-</label>
-<div class="relative">
-<span class="material-symbols-outlined text-slate-600 dark:text-slate-400 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full cursor-pointer">notifications</span>
-<div class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></div>
-</div>
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar circle" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC2RB9ByrZdJwx7d22IWcT6fpBX3DXLipfPp9EN2kRM4uwclsV6dW99WBeeiDwBDFQnB1aLOpuiF0vLYU71-TtLgqzLl749qstaZI_F2d7cz5ax5D8Tp-RScf3OA-qwo0OwnUh7l2R1_G-OjJlg0J4M_Tb28O9CQ_4nXHVnepvX2G33yk9t3d4j1J06vTvEMIF4fYoHXD3CkJA-oWxqZWPwgu__1BD-W_kb39ssacgyXgBSByOWwBv_tbZrtWKObYOt-gyCLdECDw");'></div>
+<div class="flex items-center gap-x-2">
+<button class="p-2 text-on-surface-variant hover:bg-surface-variant transition-colors rounded-lg active:scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-primary font-bold bg-surface-variant transition-colors rounded-lg active:scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<button class="ml-4 flex items-center gap-2 bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="emergency_home">emergency_home</span>
+<span class="font-mono-label text-mono-label">DASHBOARD</span>
+</button>
 </div>
 </header>
-<main class="flex-1 px-4 lg:px-10 py-8 max-w-[1440px] mx-auto w-full">
-<!-- Page Header -->
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-<div>
-<h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Alerts &amp; History</h1>
-<p class="text-slate-500 dark:text-slate-400 mt-1">Review and manage AI-detected printing anomalies across your fleet.</p>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant flex flex-col py-4 px-3 gap-y-2">
+<div class="px-3 mb-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center overflow-hidden border border-outline-variant">
+<img alt="System Operator" class="w-full h-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyIYxxIRUPDcSvhDG4KQfFjVoVoFFTQQUcJ4K9mEym520RRA6gSOfQWM9Zvkw5B1eT9prS9jAE7YcrdczJxVgrNKtq-Q5E1N48iJ3z50x2sP3yC0Q5e6nrAU3oGAyo5ILcNVZvDzNUQbQH3bszcrz8a3swaMZ8J6SnE01hsbFrzmS2itEsoP9t-KevlZP4jkT9PNmw16Y0_QujASmM7qlLfU2s70q5vt-NLXWfEUhpjnXl33_66AX2Fr4yeZecUs-qm0SmdQfb0Q"/>
 </div>
-<div class="flex gap-3">
-<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm font-medium transition-colors">
-<span class="material-symbols-outlined text-sm">download</span>
-                            Export CSV
-                        </button>
-<button class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium transition-colors">
-<span class="material-symbols-outlined text-sm">refresh</span>
-                            Refresh Data
-                        </button>
-</div>
-</div>
-<!-- Stats Overview Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-<div class="flex flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm">
-<div class="flex items-center justify-between">
-<p class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Total Sessions Today</p>
-<span class="material-symbols-outlined text-primary">precision_manufacturing</span>
-</div>
-<div class="flex items-baseline gap-3 mt-2">
-<p class="text-slate-900 dark:text-slate-100 text-3xl font-bold">12</p>
-<p class="text-emerald-500 text-sm font-semibold flex items-center">
-<span class="material-symbols-outlined text-sm">arrow_upward</span> 2%
-                            </p>
-</div>
-</div>
-<div class="flex flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm">
-<div class="flex items-center justify-between">
-<p class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Total Alerts Triggered</p>
-<span class="material-symbols-outlined text-orange-500">warning</span>
-</div>
-<div class="flex items-baseline gap-3 mt-2">
-<p class="text-slate-900 dark:text-slate-100 text-3xl font-bold">48</p>
-<p class="text-red-500 text-sm font-semibold flex items-center">
-<span class="material-symbols-outlined text-sm">arrow_upward</span> 15%
-                            </p>
-</div>
-</div>
-<div class="flex flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 shadow-sm">
-<div class="flex items-center justify-between">
-<p class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">AI Accuracy Rate</p>
-<span class="material-symbols-outlined text-emerald-500">verified</span>
-</div>
-<div class="flex items-baseline gap-3 mt-2">
-<p class="text-slate-900 dark:text-slate-100 text-3xl font-bold">99.4%</p>
-<p class="text-emerald-500 text-sm font-semibold flex items-center">
-<span class="material-symbols-outlined text-sm">arrow_upward</span> 0.1%
-                            </p>
+<div class="flex flex-col">
+<span class="font-mono-label text-mono-label text-primary">Unit 01-Alpha</span>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">Status: Active Monitoring</span>
 </div>
 </div>
 </div>
-<!-- Charts Section -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-6">
-<div class="flex items-center justify-between mb-6">
-<h3 class="font-bold text-lg">Defect Type Distribution</h3>
-<button class="text-slate-400 hover:text-slate-100"><span class="material-symbols-outlined">more_horiz</span></button>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined" data-icon="videocam">videocam</span>
+<span class="font-mono-label text-mono-label">Live Monitor</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-primary-container text-on-primary-container rounded-lg font-bold transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-mono-label text-mono-label">System Config</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-mono-label text-mono-label">Print History</span>
+</a>
+</nav>
+<div class="mt-auto pt-4 border-t border-outline-variant space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-mono-label text-mono-label">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-mono-label text-mono-label">Documentation</span>
+</a>
+<button class="w-full mt-4 bg-error-container text-on-error-container p-3 rounded-lg font-bold font-mono-label text-mono-label border border-error hover:bg-error hover:text-on-error transition-all active:translate-x-1 duration-150">
+                EMERGENCY STOP
+            </button>
 </div>
-<div class="flex flex-col sm:flex-row items-center gap-8">
-<div class="relative size-48">
-<!-- Simulated Pie Chart with SVG -->
-<svg class="size-full transform -rotate-90" viewbox="0 0 100 100">
-<circle cx="50" cy="50" fill="transparent" r="40" stroke="#007bff" stroke-dasharray="150 251.2" stroke-width="12"></circle> <!-- Spaghetti 60% -->
-<circle cx="50" cy="50" fill="transparent" r="40" stroke="#f97316" stroke-dasharray="50 251.2" stroke-dashoffset="-150" stroke-width="12"></circle> <!-- Stringing 20% -->
-<circle cx="50" cy="50" fill="transparent" r="40" stroke="#ef4444" stroke-dasharray="30 251.2" stroke-dashoffset="-200" stroke-width="12"></circle> <!-- Detachment 12% -->
-<circle cx="50" cy="50" fill="transparent" r="40" stroke="#64748b" stroke-dasharray="21.2 251.2" stroke-dashoffset="-230" stroke-width="12"></circle> <!-- Other 8% -->
-</svg>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 mt-16 p-gutter h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar">
+<div class="max-w-6xl mx-auto space-y-8 pb-12">
+<!-- Hero Header -->
+<div class="relative h-48 w-full rounded-xl overflow-hidden mb-12 border border-outline-variant">
+<div class="absolute inset-0 bg-gradient-to-r from-surface-container-highest to-transparent z-10 flex flex-col justify-center px-12">
+<h1 class="font-display-lg text-display-lg text-primary mb-2">Configuration Hub</h1>
+<p class="text-on-surface-variant max-w-md">Calibrate detection parameters, hardware interfaces, and data retention policies for Unit 01-Alpha.</p>
 </div>
-<div class="flex-1 flex flex-col gap-3 w-full">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="size-3 rounded-full bg-primary"></div>
-<span class="text-sm">Spaghetti</span>
+<img class="absolute inset-0 w-full h-full object-cover grayscale opacity-30" data-alt="A macro cinematic shot of a high-tech industrial server rack with blinking emerald green status lights and cooling fans. The atmosphere is professional and moody, with a deep dark-mode color palette of slate and charcoal. Thin structural lines and metallic textures emphasize the technical precision and authoritative brand personality of the Aegis monitoring system. Soft lighting creates a subtle glow on the mechanical components." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAm069DKw4Tigir4m6OM8WufbKZ2bJykxMNQ_qdNlsy8yd6Jglcj9yrWl8KyRjhJGbHvCgMmMGxPCi4Vt5OSOHP39yghaXS6u35QDo_wLn997eV6aJaxGYWRrQtBL2KIEM2JcAnaYE9VgqQmE_Bp7gkpAUJ3XdFL4qSx8COCPcssnqOGWUTTFkVikswnOPoOOGfethLQO62a9Y0SmIijTWdR546qafrgC9Mnm71SdOXWoPmCd8ILQ1DPmju1ok5vxRKtZH6IYzjYQ"/>
 </div>
-<span class="text-sm font-bold">60%</span>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- HARDWARE SECTION -->
+<section class="space-y-6">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-3">
+<span class="material-symbols-outlined text-primary" data-icon="developer_board">developer_board</span>
+<h2 class="font-headline-sm text-headline-sm">Hardware</h2>
 </div>
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="size-3 rounded-full bg-orange-500"></div>
-<span class="text-sm">Stringing</span>
-</div>
-<span class="text-sm font-bold">20%</span>
-</div>
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="size-3 rounded-full bg-red-500"></div>
-<span class="text-sm">Detachment</span>
-</div>
-<span class="text-sm font-bold">12%</span>
-</div>
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="size-3 rounded-full bg-slate-500"></div>
-<span class="text-sm">Other</span>
-</div>
-<span class="text-sm font-bold">8%</span>
-</div>
-</div>
-</div>
-</div>
-<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-6">
-<div class="flex items-center justify-between mb-6">
-<h3 class="font-bold text-lg">Detections per Hour</h3>
-<div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-<button class="px-2 py-1 text-xs font-medium rounded bg-white dark:bg-slate-700 shadow-sm">24h</button>
-<button class="px-2 py-1 text-xs font-medium rounded text-slate-500">7d</button>
-</div>
-</div>
-<div class="flex items-end justify-between h-48 gap-2 pt-4">
-<!-- Simulated Bar Chart -->
-<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 40%" title="08:00 - 4 events"></div>
-<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 60%" title="10:00 - 6 events"></div>
-<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 30%" title="12:00 - 3 events"></div>
-<div class="flex-1 bg-primary/40 hover:bg-primary transition-colors rounded-t-sm" style="height: 85%" title="14:00 - 12 events"></div>
-<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 20%" title="16:00 - 2 events"></div>
-<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 10%" title="18:00 - 1 event"></div>
-<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 45%" title="20:00 - 5 events"></div>
-<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 55%" title="22:00 - 7 events"></div>
-<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style="height: 35%" title="00:00 - 4 events"></div>
-</div>
-<div class="flex justify-between mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest px-1">
-<span>08:00</span>
-<span>12:00</span>
-<span>16:00</span>
-<span>20:00</span>
-<span>00:00</span>
-</div>
-</div>
-</div>
-<!-- Filter & Table Section -->
-<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden shadow-sm">
-<div class="p-4 lg:p-6 border-b border-slate-200 dark:border-slate-800">
-<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-<h3 class="font-bold text-lg">Detailed Event Log</h3>
-<div class="flex flex-wrap items-center gap-3">
-<div class="relative group">
-<select class="appearance-none bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 pl-4 pr-10 focus:ring-2 focus:ring-primary/50 cursor-pointer">
-<option>Defect Type: All</option>
-<option>Spaghetti</option>
-<option>Stringing</option>
-<option>Detachment</option>
+<div class="bg-surface-container rounded-lg p-6 border border-outline-variant space-y-6">
+<div class="space-y-2">
+<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Camera Device</label>
+<div class="relative">
+<select class="w-full bg-surface-container-high border border-outline-variant rounded p-3 text-on-surface appearance-none focus:outline-none focus:border-primary transition-colors">
+<option>Aegis-Cam-4K-01 (USB-3.0)</option>
+<option>Integrated Laptop Cam</option>
+<option>RTSP-Network-Stream-02</option>
 </select>
-<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">expand_more</span>
-</div>
-<div class="relative group">
-<select class="appearance-none bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 pl-4 pr-10 focus:ring-2 focus:ring-primary/50 cursor-pointer">
-<option>Confidence: 80%+</option>
-<option>Confidence: 90%+</option>
-<option>Confidence: 95%+</option>
-<option>All</option>
-</select>
-<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">expand_more</span>
-</div>
-<div class="relative group">
-<button class="bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm font-medium py-2 px-4 flex items-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-<span class="material-symbols-outlined text-sm">calendar_today</span>
-                                        Last 24 Hours
-                                    </button>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none" data-icon="expand_more">expand_more</span>
 </div>
 </div>
-</div>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="bg-slate-50 dark:bg-slate-800/50">
-<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Timestamp</th>
-<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Snapshot</th>
-<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Defect Type</th>
-<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Confidence</th>
-<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Printer</th>
-<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Action</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-<!-- Row 1 -->
-<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-<td class="px-6 py-4">
-<div class="flex flex-col">
-<span class="text-sm font-medium">Oct 24, 2023</span>
-<span class="text-xs text-slate-500">14:23:12</span>
-</div>
-</td>
-<td class="px-6 py-4">
-<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
-<div class="size-full bg-center bg-cover" data-alt="Microscopic snapshot of 3D print defect" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBGvmGhWpK8JjeH8nzq0jD6crtjYs2J-jnQiMuNUnIt23XQRmiBlwOi269-rGipsl6rjTdss0dOf32F5bAKVD20H8fmflxk_n8gG7qgBa2xIcXoUWogW69j7YSbBJ13AsSa1T10ccS28mRsqzcAVjBBNZEg6685pwp00HTgce3hVfO_Bw2n-rymhHicZColncYhazs-aRWJo618vQbZ6WbPAMl2g199v9g9sZyo1JZ_O8_v79G3JH7bB9oL0TuqAVVTFRz9wzGDqw');"></div>
-</div>
-</td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-                                            Spaghetti
-                                        </span>
-</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-2">
-<div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-<div class="h-full bg-emerald-500" style="width: 98%"></div>
-</div>
-<span class="text-sm font-bold">98.2%</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-slate-400">Ender-3 Pro V2</td>
-<td class="px-6 py-4 text-right">
-<button class="text-primary text-sm font-bold hover:underline">View Details</button>
-</td>
-</tr>
-<!-- Row 2 -->
-<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-<td class="px-6 py-4">
-<div class="flex flex-col">
-<span class="text-sm font-medium">Oct 24, 2023</span>
-<span class="text-xs text-slate-500">14:15:45</span>
-</div>
-</td>
-<td class="px-6 py-4">
-<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
-<div class="size-full bg-center bg-cover" data-alt="Microscopic snapshot of 3D print defect" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCAqggbhuTVAQmfalIaTO5c-sCmnppqH1o7p_eMvSTn6zBXasKtWp1NSo3jymQSSRtJ_AdkLNO_cJkX-Vfn_I0o_wYUHAkXxtoP8YCoAokCEuGEZaFlm28qq5flngCFmtHlyVVj1-vAkSY5XDpOPjB_fkKhYImpxltO8gJj2A4hFOA7MpKczqtcdGvoe2QljfNw8YjiLXdg5WRaxPWSp3JU6sBU9S6vKGBmr7Cnj0nfUBDgkrxz98ZD0nVa-eV7zKVoC22yLhOQhg');"></div>
-</div>
-</td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-500/10 text-orange-500 border border-orange-500/20">
-                                            Stringing
-                                        </span>
-</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-2">
-<div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-<div class="h-full bg-emerald-500" style="width: 89%"></div>
-</div>
-<span class="text-sm font-bold">89.5%</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-slate-400">Bambu Lab X1C</td>
-<td class="px-6 py-4 text-right">
-<button class="text-primary text-sm font-bold hover:underline">View Details</button>
-</td>
-</tr>
-<!-- Row 3 -->
-<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-<td class="px-6 py-4">
-<div class="flex flex-col">
-<span class="text-sm font-medium">Oct 24, 2023</span>
-<span class="text-xs text-slate-500">13:50:22</span>
-</div>
-</td>
-<td class="px-6 py-4">
-<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
-<div class="size-full bg-center bg-cover" data-alt="Microscopic snapshot of 3D print defect" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA0bauIENA3py9u3an-RGZQRdTSx2Pf8wom9kenJxrNPVkpN5ooXV1eLObj4hZxKu7AcbmeR1pMXJcNEjblPsevuioksqg91S03x40MTtk0kegXSZIRXHbdXxz743SDYbnqEuPhZjKFM6Ggt3lFDGu8ewGt7qypCIhJep65TRPLYdKUi-6vm2T1WsJjKxpmlxl-NHu1lvWq27aY-RDk9FqO0HnZ-rJt4wN3UUns_mEx3v5ErvPQL6JKNSy_lcl94hTwrbP78xFtjw');"></div>
-</div>
-</td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/20">
-                                            Detachment
-                                        </span>
-</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-2">
-<div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-<div class="h-full bg-yellow-500" style="width: 76%"></div>
-</div>
-<span class="text-sm font-bold">76.8%</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-slate-400">Prusa MK4 #2</td>
-<td class="px-6 py-4 text-right">
-<button class="text-primary text-sm font-bold hover:underline">View Details</button>
-</td>
-</tr>
-<!-- Row 4 -->
-<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-<td class="px-6 py-4">
-<div class="flex flex-col">
-<span class="text-sm font-medium">Oct 24, 2023</span>
-<span class="text-xs text-slate-500">12:04:15</span>
-</div>
-</td>
-<td class="px-6 py-4">
-<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
-<div class="size-full bg-center bg-cover" data-alt="Microscopic snapshot of 3D print defect" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCmJGZKhpY8OVBMIixQC-fPCPj8fogQWp9Ip_co-4wP5IhJ-mAq9pxFBFwqRpb_RoCD78OBIgRkAZ5XL5BkL0WFYHrD-_ew1kvsUtd-C9o96WaimytoLjHrJSx8uHFzhQX2OYKBt-Da-GgIASc3EajaH1seDAcgX-9SkQWRnCxEuv-MOLD9oWLUCjMWH4xVzABCCQnHECsO-p5OKlm3z_qzxDEFWqoBSzbtmqyqI9NBAa51mhgrZpbZ9gqszrKX4HxezRpsayj0Cw');"></div>
-</div>
-</td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
-                                            Spaghetti
-                                        </span>
-</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-2">
-<div class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-<div class="h-full bg-emerald-500" style="width: 99%"></div>
-</div>
-<span class="text-sm font-bold">99.1%</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-slate-400">Voron 2.4 Custom</td>
-<td class="px-6 py-4 text-right">
-<button class="text-primary text-sm font-bold hover:underline">View Details</button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-<span class="text-sm text-slate-500">Showing 1-10 of 48 events</span>
+<div class="space-y-2">
+<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Frame Rate Limit</label>
 <div class="flex gap-2">
-<button class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded disabled:opacity-50 text-sm font-medium">Previous</button>
-<button class="px-3 py-1 bg-primary text-white rounded text-sm font-medium">Next</button>
+<button class="flex-1 bg-surface-container-high border border-primary text-primary py-2 font-mono-label text-mono-label rounded">30 FPS</button>
+<button class="flex-1 bg-surface-container-high border border-outline-variant text-on-surface-variant py-2 font-mono-label text-mono-label rounded hover:border-surface-tint">60 FPS</button>
+<button class="flex-1 bg-surface-container-high border border-outline-variant text-on-surface-variant py-2 font-mono-label text-mono-label rounded hover:border-surface-tint">90 FPS</button>
 </div>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded border border-outline-variant">
+<div>
+<p class="font-body-sm text-body-sm font-semibold">HW Acceleration</p>
+<p class="text-[10px] text-on-surface-variant">Using NVIDIA TensorRT</p>
+</div>
+<div class="w-12 h-6 bg-primary-container rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 w-4 h-4 bg-on-primary-container rounded-full"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- MODEL SECTION -->
+<section class="space-y-6">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-3">
+<span class="material-symbols-outlined text-primary" data-icon="psychology">psychology</span>
+<h2 class="font-headline-sm text-headline-sm">Model Analysis</h2>
+</div>
+<div class="bg-surface-container rounded-lg p-6 border border-outline-variant space-y-8">
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Confidence Alert Threshold</label>
+<span class="font-mono-label text-headline-sm text-primary" id="threshold-val">85%</span>
+</div>
+<input class="w-full cursor-pointer accent-primary" id="threshold-slider" max="100" min="0" type="range" value="85"/>
+<div class="flex justify-between text-[10px] text-on-surface-variant uppercase font-mono-label">
+<span>Permissive</span>
+<span>Strict</span>
+</div>
+</div>
+<div class="space-y-4">
+<label class="font-mono-label text-mono-label text-on-surface-variant uppercase block border-b border-outline-variant pb-2">Active Defect Types</label>
+<div class="space-y-3">
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-error-container/20 rounded flex items-center justify-center border border-error/30">
+<span class="material-symbols-outlined text-error" data-icon="blur_on">blur_on</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm font-semibold">Spaghetti Detection</p>
+<p class="text-[10px] text-on-surface-variant">Extrusion failure monitoring</p>
+</div>
+</div>
+<input checked="" class="w-5 h-5 rounded border-outline-variant bg-surface-container text-primary focus:ring-primary" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-secondary-container/20 rounded flex items-center justify-center border border-secondary/30">
+<span class="material-symbols-outlined text-secondary" data-icon="gesture">gesture</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm font-semibold">Stringing Detection</p>
+<p class="text-[10px] text-on-surface-variant">Fine filament artifacts</p>
+</div>
+</div>
+<input checked="" class="w-5 h-5 rounded border-outline-variant bg-surface-container text-primary focus:ring-primary" type="checkbox"/>
+</div>
+<div class="flex items-center justify-between group cursor-pointer opacity-50">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-variant rounded flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="grid_view">grid_view</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm font-semibold">Warping (Experimental)</p>
+<p class="text-[10px] text-on-surface-variant">Edge lifting detection</p>
+</div>
+</div>
+<input class="w-5 h-5 rounded border-outline-variant bg-surface-container text-primary focus:ring-primary" type="checkbox"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- STORAGE SECTION -->
+<section class="space-y-6">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-3">
+<span class="material-symbols-outlined text-primary" data-icon="database">database</span>
+<h2 class="font-headline-sm text-headline-sm">Storage</h2>
+</div>
+<div class="bg-surface-container rounded-lg p-6 border border-outline-variant space-y-6">
+<div class="space-y-2">
+<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Capture Path</label>
+<div class="flex gap-2">
+<input class="flex-1 bg-surface-container-high border border-outline-variant rounded p-3 text-on-surface text-sm font-mono focus:outline-none focus:border-primary" type="text" value="/mnt/aegis/records/unit_01"/>
+<button class="bg-surface-container-high border border-outline-variant px-3 rounded hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+</button>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between">
+<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Storage Limit</label>
+<span class="font-mono-label text-body-sm text-primary">500 GB</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded overflow-hidden">
+<div class="bg-primary h-full" style="width: 65%"></div>
+</div>
+<p class="text-[10px] text-right text-on-surface-variant uppercase">325 GB Used / 175 GB Free</p>
+</div>
+<div class="space-y-2">
+<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Purge Policy</label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 p-3 rounded bg-surface-container-low border border-outline-variant cursor-pointer hover:border-primary transition-colors">
+<input checked="" class="text-primary focus:ring-primary bg-surface-container border-outline-variant" name="purge" type="radio"/>
+<span class="font-body-sm text-body-sm">Delete files older than 30 days</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded bg-surface-container-low border border-outline-variant cursor-pointer hover:border-primary transition-colors">
+<input class="text-primary focus:ring-primary bg-surface-container border-outline-variant" name="purge" type="radio"/>
+<span class="font-body-sm text-body-sm">Overwrite oldest on Full</span>
+</label>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- ACTION FOOTER -->
+<div class="flex justify-end items-center gap-4 mt-12 pt-8 border-t border-outline-variant">
+<button class="px-6 py-3 border border-outline-variant rounded-lg font-mono-label text-mono-label text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-95">
+                    RESET TO DEFAULT
+                </button>
+<button class="px-12 py-3 bg-primary text-on-primary-container rounded-lg font-bold font-mono-label text-mono-label shadow-[0_0_20px_rgba(78,222,163,0.3)] hover:brightness-110 transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="save" style="font-variation-settings: 'FILL' 1;">save</span>
+                    SAVE CONFIGURATION
+                </button>
 </div>
 </div>
 </main>
-<!-- Footer -->
-<footer class="mt-auto border-t border-slate-200 dark:border-slate-800 px-10 py-6 text-center text-slate-500 text-sm">
-<p>© 2023 PrintGuard AI Monitoring System. All rights reserved.</p>
-</footer>
+<!-- Success Notification Toast (Hidden) -->
+<div class="fixed bottom-8 right-8 bg-surface-container-highest border border-primary p-4 rounded-lg shadow-2xl flex items-center gap-4 transform translate-y-24 opacity-0 transition-all duration-300 z-[100]" id="save-toast">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<p class="font-bold text-primary">Configuration Saved</p>
+<p class="text-xs text-on-surface-variant">System Unit 01-Alpha has been updated.</p>
 </div>
 </div>
+<script>
+        // Micro-interaction for Threshold Slider
+        const slider = document.getElementById('threshold-slider');
+        const sliderVal = document.getElementById('threshold-val');
+        
+        slider.addEventListener('input', (e) => {
+            sliderVal.textContent = `${e.target.value}%`;
+            // Dynamic color shift logic mentioned in Brand Anchors
+            if(e.target.value < 50) {
+                sliderVal.className = 'font-mono-label text-headline-sm text-error';
+            } else if(e.target.value < 80) {
+                sliderVal.className = 'font-mono-label text-headline-sm text-secondary';
+            } else {
+                sliderVal.className = 'font-mono-label text-headline-sm text-primary';
+            }
+        });
+
+        // Save Interaction
+        const saveBtn = document.querySelector('button:contains("SAVE CONFIGURATION")') || document.querySelector('.bg-primary');
+        const toast = document.getElementById('save-toast');
+
+        saveBtn.addEventListener('click', () => {
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        });
+
+        // Hover atmosphere effect for sections
+        const sections = document.querySelectorAll('section');
+        sections.forEach(section => {
+            section.addEventListener('mouseenter', () => {
+                section.querySelector('.bg-surface-container').classList.add('border-primary/50');
+            });
+            section.addEventListener('mouseleave', () => {
+                section.querySelector('.bg-surface-container').classList.remove('border-primary/50');
+            });
+        });
+    </script>
 </body></html>
