@@ -1,274 +1,411 @@
 <!DOCTYPE html>
 
-<html class="dark" lang="en"><head>
+<html class="dark" dir="ltr" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>AI Monitoring Service - System Settings</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#007bff",
-                        "background-light": "#f5f7f8",
-                        "background-dark": "#0f1923",
-                    },
-                    fontFamily: {
-                        "display": ["Inter"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#060e20",
+                    "error": "#ffb4ab",
+                    "primary-fixed": "#6ffbbe",
+                    "on-primary-fixed-variant": "#005236",
+                    "tertiary-container": "#ff7a73",
+                    "outline": "#86948a",
+                    "tertiary-fixed": "#ffdad7",
+                    "outline-variant": "#3c4a42",
+                    "on-secondary-container": "#5b3800",
+                    "secondary-fixed": "#ffddb8",
+                    "secondary-container": "#ee9800",
+                    "surface-variant": "#2d3449",
+                    "primary-container": "#10b981",
+                    "on-secondary-fixed": "#2a1700",
+                    "on-background": "#dae2fd",
+                    "surface-container-high": "#222a3d",
+                    "surface-bright": "#31394d",
+                    "inverse-surface": "#dae2fd",
+                    "on-tertiary": "#68000a",
+                    "surface-container-highest": "#2d3449",
+                    "secondary-fixed-dim": "#ffb95f",
+                    "on-tertiary-container": "#79000e",
+                    "on-tertiary-fixed-variant": "#930013",
+                    "tertiary-fixed-dim": "#ffb3ad",
+                    "inverse-on-surface": "#283044",
+                    "primary": "#4edea3",
+                    "on-surface-variant": "#bbcabf",
+                    "surface-tint": "#4edea3",
+                    "on-error": "#690005",
+                    "surface-dim": "#0b1326",
+                    "error-container": "#93000a",
+                    "background": "#0b1326",
+                    "on-tertiary-fixed": "#410004",
+                    "inverse-primary": "#006c49",
+                    "on-error-container": "#ffdad6",
+                    "surface": "#0b1326",
+                    "on-primary-container": "#00422b",
+                    "on-primary-fixed": "#002113",
+                    "on-primary": "#003824",
+                    "on-secondary": "#472a00",
+                    "surface-container-low": "#131b2e",
+                    "primary-fixed-dim": "#4edea3",
+                    "tertiary": "#ffb3ad",
+                    "secondary": "#ffb95f",
+                    "on-secondary-fixed-variant": "#653e00",
+                    "surface-container": "#171f33",
+                    "on-surface": "#dae2fd"
             },
-        }
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "widget-gap": "0.75rem",
+                    "gutter": "1rem",
+                    "container-padding": "1.5rem",
+                    "video-ratio": "16/9"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "mono-label": ["JetBrains Mono"],
+                    "status-badge": ["JetBrains Mono"],
+                    "display-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "mono-label": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "status-badge": ["11px", {"lineHeight": "12px", "fontWeight": "700"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
     </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { background-color: #0b1326; color: #dae2fd; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #131b2e; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+        .status-glow-emerald { box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
+        .status-glow-crimson { box-shadow: 0 0 8px rgba(244, 63, 94, 0.2); }
+    </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
-<div class="flex h-full min-h-screen w-full flex-col">
-<!-- Top Navigation Bar -->
-<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark px-6 py-3 sticky top-0 z-50">
+<body class="font-body-lg text-body-lg overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-gutter h-16 bg-surface-container-low dark:bg-surface-container-low border-b border-outline-variant dark:border-outline-variant shrink-0 z-50">
 <div class="flex items-center gap-4">
-<div class="text-primary">
-<span class="material-symbols-outlined text-3xl">monitoring</span>
+<span class="font-display-lg text-display-lg font-bold text-primary dark:text-primary tracking-tighter">Aegis Print Guard</span>
 </div>
-<h2 class="text-lg font-bold tracking-tight">AI Monitoring Service</h2>
-</div>
-<nav class="hidden md:flex items-center gap-8">
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Logs</a>
-<a class="text-sm font-medium text-primary" href="#">Settings</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Reports</a>
-</nav>
-<div class="flex items-center gap-3">
-<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-<span class="material-symbols-outlined text-xl">notifications</span>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-on-surface-variant font-medium">
+<button class="hover:bg-surface-bright transition-colors p-2 rounded active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
 </button>
-<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-<span class="material-symbols-outlined text-xl">account_circle</span>
+<button class="hover:bg-surface-bright transition-colors p-2 rounded active:scale-95 transition-transform duration-150 relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
 </button>
-<div class="w-10 h-10 rounded-full bg-primary/20 border border-primary/50 overflow-hidden">
-<img alt="User Profile" class="w-full h-full object-cover" data-alt="Avatar placeholder with a soft gradient circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARTxX3lZKK4cYNksFNEhZ4_TFxqa3tw1ETOWlvIbVRErIbcb3miahExSFpcPNHab9RY7Cmw-Ovz8o1U-X9i8mU_gaGrwQ7JZ2yvk2AKbnyoBOiVWZOLQBejhjHCIESAuA7u_Wv6w-UcsAuxrp91hiO7kH-MF35hoTGYPnSPhR5_vmIlx0cRhUMiqqCYrTIcUSM_20v0BP50qE8CBxQFRpOUkZK8Z0b9bbV5g1KxCxW-AjOyX7g6J0Ev_eObWCtlv7eLj6xMmr0Qw"/>
+<button class="hover:bg-surface-bright transition-colors p-2 rounded active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
 </div>
 </div>
 </header>
-<main class="flex-1 flex overflow-hidden">
-<!-- Sidebar Navigation -->
-<aside class="w-64 border-r border-slate-200 dark:border-slate-800 p-6 hidden lg:flex flex-col gap-2">
-<div class="mb-4 px-2">
-<h1 class="text-lg font-bold">System Settings</h1>
-<p class="text-slate-500 text-xs">Manage AI monitoring parameters</p>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-full py-container-padding bg-surface dark:bg-surface border-r border-outline-variant dark:border-outline-variant w-[320px] shrink-0">
+<div class="px-6 mb-8">
+<h2 class="font-display-lg text-display-lg text-primary">Aegis Guard</h2>
+<p class="font-mono-label text-mono-label text-on-surface-variant">Constant Vigilance</p>
 </div>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#general">
-<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">settings</span>
-<span class="text-sm font-medium">General</span>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-variant dark:hover:bg-surface-variant transition-all active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="videocam">videocam</span>
+<span class="font-mono-label text-mono-label">Live Monitor</span>
 </a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary transition-colors border-l-2 border-primary" href="#capture">
-<span class="material-symbols-outlined">videocam</span>
-<span class="text-sm font-medium">Capture Service</span>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-variant dark:hover:bg-surface-variant transition-all active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-mono-label text-mono-label">System Config</span>
 </a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#ai-model">
-<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">psychology</span>
-<span class="text-sm font-medium">AI Model</span>
+<a class="flex items-center gap-3 px-4 py-3 rounded bg-primary-container text-on-primary-container font-bold border-l-4 border-primary transition-all active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-mono-label text-mono-label">Print History</span>
 </a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#notifications">
-<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">mail</span>
-<span class="text-sm font-medium">Notifications</span>
+</nav>
+<div class="px-3 pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-variant dark:hover:bg-surface-variant transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-mono-label text-mono-label">System Health</span>
 </a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#storage">
-<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">database</span>
-<span class="text-sm font-medium">Storage &amp; Database</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" href="#api">
-<span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">key</span>
-<span class="text-sm font-medium">API Keys</span>
-</a>
+<div class="mt-6 flex items-center gap-3 px-4">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="System Operator" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGkS_0CCYf4p115LV8w2h9zHAO9zC56Q9pHxjOkDMDvdthCSdjKXdpH_pwi064gGUqT2YkkAqSFYg5NvdB6M1Ops4rumoWoB1iLPtwUAV9ObyrOUhoAMUyEHIq5lI1dZIOyKzxh-nttgkY7gxMzlJoSqdPdkxpUEEFuipBJBoAMtIZI1vtSWPmQAVf5MP6VwQushzO8CpRwD09HEK-2JV97-IUwLPcNaR8bYLTqfN_7N5N5w8n3tk-iP7G75Y7uU1EggDJ501nhg"/>
+</div>
+<div>
+<p class="font-mono-label text-mono-label text-on-surface">System Operator</p>
+<p class="text-[10px] text-on-surface-variant">Connected</p>
+</div>
+</div>
+</div>
 </aside>
-<!-- Settings Content -->
-<div class="flex-1 overflow-y-auto p-6 md:p-10 bg-slate-50/50 dark:bg-background-dark">
-<div class="max-w-4xl mx-auto space-y-12">
-<!-- Header -->
-<section>
-<h2 class="text-4xl font-black tracking-tight mb-2">System Settings</h2>
-<p class="text-slate-500">Configure your monitoring service parameters, AI sensitivity, and third-party integrations.</p>
-</section>
-<!-- Capture Service Section -->
-<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm" id="capture">
-<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">videocam</span>
-<h3 class="text-xl font-bold">Capture Service</h3>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col overflow-hidden bg-background">
+<!-- Page Header -->
+<section class="px-container-padding py-6 flex justify-between items-end border-b border-outline-variant bg-surface-container-low">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface mb-1">Alerts &amp; Print History</h1>
+<p class="text-on-surface-variant font-body-sm text-body-sm">Reviewing AI-detected anomalies and managing print system events.</p>
 </div>
-<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="space-y-2">
-<label class="text-sm font-semibold">Camera Device</label>
-<select class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all appearance-none">
-<option>Intel RealSense D435 (ID: 0x48a)</option>
-<option>Sony IMX Global Shutter (ID: 0x221)</option>
-<option>Standard USB WebCam</option>
+<div class="flex gap-widget-gap">
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded hover:bg-surface-bright transition-colors text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="download">download</span>
+                        Export CSV
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container font-bold rounded hover:opacity-90 transition-opacity text-on-surface font-body-sm text-body-sm status-glow-emerald">
+<span class="material-symbols-outlined text-[18px]" data-icon="refresh">refresh</span>
+                        Refresh Data
+                    </button>
+</div>
+</section>
+<!-- Filters Bar -->
+<section class="px-container-padding py-4 bg-surface-container border-b border-outline-variant flex items-center gap-gutter">
+<div class="flex-1 relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full bg-surface-dim border border-outline-variant rounded pl-10 pr-4 py-2 font-body-sm text-body-sm focus:border-primary focus:ring-0 text-on-surface" placeholder="Search by Print ID..." type="text"/>
+</div>
+<div class="flex gap-4">
+<select class="bg-surface-dim border border-outline-variant rounded px-3 py-2 font-mono-label text-mono-label text-on-surface focus:border-primary">
+<option>Defect Type: All</option>
+<option>Spaghetti</option>
+<option>Stringing</option>
+<option>Normal</option>
+</select>
+<select class="bg-surface-dim border border-outline-variant rounded px-3 py-2 font-mono-label text-mono-label text-on-surface focus:border-primary">
+<option>Confidence: All</option>
+<option>&gt; 50%</option>
+<option>&gt; 75%</option>
+<option>&gt; 90%</option>
+</select>
+<select class="bg-surface-dim border border-outline-variant rounded px-3 py-2 font-mono-label text-mono-label text-on-surface focus:border-primary">
+<option>Time Range: Last 24 Hours</option>
+<option>Last 7 Days</option>
+<option>Last 30 Days</option>
+<option>Custom Range</option>
 </select>
 </div>
-<div class="space-y-2">
-<label class="text-sm font-semibold">FPS Limit</label>
-<input class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" type="number" value="30"/>
-</div>
-<div class="space-y-2 col-span-full">
-<label class="text-sm font-semibold">Resolution Settings</label>
-<div class="grid grid-cols-2 gap-4">
-<select class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none transition-all appearance-none">
-<option>1920 x 1080 (1080p)</option>
-<option>1280 x 720 (720p)</option>
-<option>640 x 480 (VGA)</option>
-</select>
-<select class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none transition-all appearance-none">
-<option>Aspect Ratio: 16:9</option>
-<option>Aspect Ratio: 4:3</option>
-</select>
-</div>
-</div>
-</div>
 </section>
-<!-- AI Model Configuration -->
-<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm" id="ai-model">
-<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">psychology</span>
-<h3 class="text-xl font-bold">AI Model Configuration</h3>
+<!-- Data Table Section -->
+<div class="flex-1 overflow-auto custom-scrollbar px-container-padding py-6">
+<div class="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high text-on-surface-variant font-mono-label text-mono-label border-b border-outline-variant">
+<th class="p-4 font-bold">Timestamp</th>
+<th class="p-4 font-bold">Snapshot</th>
+<th class="p-4 font-bold">Event / Defect Type</th>
+<th class="p-4 font-bold">AI Confidence</th>
+<th class="p-4 font-bold">Layer ID</th>
+<th class="p-4 font-bold text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="text-on-surface font-body-sm text-body-sm">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-surface-variant/30 transition-colors">
+<td class="p-4 font-mono-label">2023-10-24 14:32:01</td>
+<td class="p-4">
+<div class="w-16 h-10 bg-surface-dim border border-outline-variant rounded overflow-hidden">
+<img alt="Spaghetti defect close-up" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJLrjSSeZm8WlFr9IwImiJBIuoS56HKq9ZJZCKnPc_hQj3GrTi9NSNIIYelJSpBHcAL8KgFgN77ygUjgu9kYK_lTJWDszNE6nFyqo2SapSvL5OEtf501OVR4x0cMorXHUryoXc35e0hBkZe_lDdu16TZLXABMgKntDsL1CC2VZcI9NAOVzpdHtbg2tFHCWnkTowYLsK7mJ4QJqIbe3FvfqDN3-UIqD-u7XklTdMjDLNdMrn7KHu1rT3Gh4P7pSpQQAgvFKkO48zQ"/>
 </div>
-<div class="p-6 space-y-6">
-<div class="space-y-4">
-<div class="flex justify-between items-center">
-<label class="text-sm font-semibold">Confidence Alert Threshold (85%)</label>
-<span class="text-primary font-bold">85%</span>
+</td>
+<td class="p-4">
+<span class="bg-error-container text-on-error-container px-2 py-0.5 rounded-full font-status-badge text-status-badge">CRITICAL: Spaghetti</span>
+</td>
+<td class="p-4">
+<div class="flex items-center gap-2">
+<div class="w-24 h-1 bg-surface-dim rounded-full overflow-hidden">
+<div class="h-full bg-error" style="width: 94%"></div>
 </div>
-<input class="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary" max="100" min="0" type="range" value="85"/>
+<span class="font-mono-label text-error">94%</span>
 </div>
-<div class="space-y-4">
-<label class="text-sm font-semibold">Detected Defect Toggles</label>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<label class="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
-<span class="text-sm">Surface Scratches</span>
-<input checked="" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
-</label>
-<label class="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
-<span class="text-sm">Dimensional Deviation</span>
-<input checked="" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
-</label>
-<label class="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
-<span class="text-sm">Color Misalignment</span>
-<input class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
-</label>
-<label class="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
-<span class="text-sm">Edge Cracks</span>
-<input checked="" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary" type="checkbox"/>
-</label>
+</td>
+<td class="p-4 font-mono-label">#1,402</td>
+<td class="p-4 text-center">
+<button class="text-primary hover:underline font-bold">View Details</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant hover:bg-surface-variant/30 transition-colors">
+<td class="p-4 font-mono-label">2023-10-24 14:28:45</td>
+<td class="p-4">
+<div class="w-16 h-10 bg-surface-dim border border-outline-variant rounded overflow-hidden">
+<img alt="Normal layer deposition" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy3xPthW-IF0LS8G8cxlsePqFl7c61du4a0FUUqbgHIdF6aVC2zYHDlXcaVaZQ2DJ3FZj3nyCsnEqHpUjnIgBkOZ6JsJur0CRLjpon5fFdk75OeZ39nDZzJnwKnyL63GCNKD78nVYcSvYUZ4Xc5Sp4nZ-u606dDA5OT17F1VRP8N8VdC4POWp_1expSdwv8kBAHKfJg9TSnpt-eDiUSy21Y1GCosmMxqFXijk62LH0Yvv2miQQiVHaYjrsQtYJSWERLHFs4SYmqA"/>
 </div>
+</td>
+<td class="p-4">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full font-status-badge text-status-badge">WARNING: Stringing</span>
+</td>
+<td class="p-4">
+<div class="flex items-center gap-2">
+<div class="w-24 h-1 bg-surface-dim rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 62%"></div>
 </div>
+<span class="font-mono-label text-secondary">62%</span>
 </div>
-</section>
-<!-- Notifications -->
-<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm" id="notifications">
-<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">notifications_active</span>
-<h3 class="text-xl font-bold">Notification Integrations</h3>
+</td>
+<td class="p-4 font-mono-label">#1,388</td>
+<td class="p-4 text-center">
+<button class="text-primary hover:underline font-bold">View Details</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant hover:bg-surface-variant/30 transition-colors">
+<td class="p-4 font-mono-label">2023-10-24 14:15:20</td>
+<td class="p-4">
+<div class="w-16 h-10 bg-surface-dim border border-outline-variant rounded overflow-hidden">
+<img alt="Clean print structure" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXPxFfKybHAKEijTpSNZT3UeGJnbTMN1sBXnJ2oqDGpuO7uopeuIZzyIbRr5Y8KJ4761qAUQ016cFoMDibaZdr7-13X3GuwRCy7-_vw714EvZjcesLZ4-rbBtEj8UnYA4q4_eur7DKYn_a4nVIIBVGDu8WwVVW8eiKvfx71Ba_Cjk3PV2O70k7t4Ya0Ol3VXKq2v050elg66gYQLv30L41JxeyYsj3vPVzc-lB5fzzZ-tSVtDdMiwIo3Xe__Cx2lTTuqQp7Gt8ww"/>
 </div>
-<div class="p-6 space-y-6">
-<div class="space-y-2">
-<label class="text-sm font-semibold">Custom Webhook URL</label>
-<input class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="https://api.yourdomain.com/webhooks/alerts" type="url"/>
+</td>
+<td class="p-4">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full font-status-badge text-status-badge">RESOLVED</span>
+</td>
+<td class="p-4">
+<div class="flex items-center gap-2">
+<div class="w-24 h-1 bg-surface-dim rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 98%"></div>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="space-y-2">
-<label class="text-sm font-semibold">Slack/Discord Channel Hook</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">link</span>
-<input class="w-full h-12 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="https://hooks.slack.com/services/..." type="text"/>
+<span class="font-mono-label text-primary">98%</span>
 </div>
-</div>
-<div class="space-y-2">
-<label class="text-sm font-semibold">Email Alerts</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">email</span>
-<input class="w-full h-12 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="alerts@manufacturing.co" type="email"/>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- Storage & Database -->
-<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm" id="storage">
-<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">database</span>
-<h3 class="text-xl font-bold">Storage &amp; Database</h3>
-</div>
-<div class="p-6 space-y-6">
-<div class="space-y-2">
-<label class="text-sm font-semibold">SQLite Database Path</label>
+</td>
+<td class="p-4 font-mono-label">#1,250</td>
+<td class="p-4 text-center">
+<button class="text-primary hover:underline font-bold">View Details</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="p-4 bg-surface-container-high flex justify-between items-center border-t border-outline-variant">
+<span class="font-mono-label text-mono-label text-on-surface-variant">Showing 1-10 of 452 events</span>
 <div class="flex gap-2">
-<input class="flex-1 h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/50 text-slate-500 cursor-not-allowed" readonly="" type="text" value="/var/lib/ai-monitor/service.db"/>
-<button class="px-4 h-12 bg-slate-200 dark:bg-slate-700 rounded-lg text-sm font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Browse</button>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="space-y-2">
-<label class="text-sm font-semibold">Image Storage Limit (GB)</label>
-<input class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all" type="number" value="500"/>
-</div>
-<div class="space-y-2">
-<label class="text-sm font-semibold">Auto-Purge Cycles</label>
-<select class="w-full h-12 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/50 outline-none transition-all appearance-none">
-<option>Purge older than 30 days</option>
-<option>Purge older than 90 days</option>
-<option>Never purge (Manual)</option>
-</select>
+<button class="p-2 rounded border border-outline-variant hover:bg-surface-bright disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="px-3 py-1 rounded bg-primary-container text-on-primary-container font-bold font-mono-label">1</button>
+<button class="px-3 py-1 rounded border border-outline-variant hover:bg-surface-bright font-mono-label">2</button>
+<button class="px-3 py-1 rounded border border-outline-variant hover:bg-surface-bright font-mono-label">3</button>
+<button class="p-2 rounded border border-outline-variant hover:bg-surface-bright">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
 </div>
 </div>
 </div>
-</section>
-<!-- API Key Management -->
-<section class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm mb-12" id="api">
-<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+</div>
+<!-- Footer Analytics -->
+<footer class="p-container-padding bg-surface-container-lowest border-t border-outline-variant shrink-0">
+<div class="grid grid-cols-3 gap-gutter">
+<!-- Widget 1: Alert Distribution -->
+<div class="bg-surface-container-high border border-outline-variant rounded p-4">
+<h3 class="font-mono-label text-mono-label text-on-surface-variant mb-4 flex items-center justify-between">
+                            Alert Distribution
+                            <span class="material-symbols-outlined text-[16px]" data-icon="bar_chart">bar_chart</span>
+</h3>
+<div class="space-y-3">
 <div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">key</span>
-<h3 class="text-xl font-bold">API Key Management</h3>
+<span class="w-16 font-mono-label text-error text-[10px]">Spaghetti</span>
+<div class="flex-1 h-2 bg-surface-dim rounded-full">
+<div class="h-full bg-error rounded-full" style="width: 45%"></div>
 </div>
-<button class="text-sm font-bold text-primary hover:underline">+ Generate New Key</button>
+<span class="font-mono-label text-[10px]">45%</span>
 </div>
-<div class="p-6 space-y-4">
-<div class="flex items-center justify-between p-4 rounded-lg bg-slate-100 dark:bg-slate-800/40 border border-dashed border-slate-300 dark:border-slate-700">
-<div class="flex flex-col">
-<span class="text-xs font-bold uppercase tracking-wider text-slate-500">REST API ACCESS</span>
-<code class="text-sm font-mono mt-1">ai_rest_92kL...88xp1</code>
+<div class="flex items-center gap-3">
+<span class="w-16 font-mono-label text-secondary text-[10px]">Stringing</span>
+<div class="flex-1 h-2 bg-surface-dim rounded-full">
+<div class="h-full bg-secondary rounded-full" style="width: 30%"></div>
 </div>
-<div class="flex gap-2">
-<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"><span class="material-symbols-outlined text-xl">content_copy</span></button>
-<button class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 rounded transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+<span class="font-mono-label text-[10px]">30%</span>
 </div>
+<div class="flex items-center gap-3">
+<span class="w-16 font-mono-label text-on-surface-variant text-[10px]">Other</span>
+<div class="flex-1 h-2 bg-surface-dim rounded-full">
+<div class="h-full bg-outline rounded-full" style="width: 25%"></div>
 </div>
-<div class="flex items-center justify-between p-4 rounded-lg bg-slate-100 dark:bg-slate-800/40 border border-dashed border-slate-300 dark:border-slate-700">
-<div class="flex flex-col">
-<span class="text-xs font-bold uppercase tracking-wider text-slate-500">WEBSOCKET STREAMING</span>
-<code class="text-sm font-mono mt-1">ai_ws_77zB...21qx9</code>
-</div>
-<div class="flex gap-2">
-<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"><span class="material-symbols-outlined text-xl">content_copy</span></button>
-<button class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 rounded transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+<span class="font-mono-label text-[10px]">25%</span>
 </div>
 </div>
 </div>
-</section>
-<!-- Action Buttons -->
-<div class="flex items-center justify-end gap-4 pb-20">
-<button class="px-8 h-12 rounded-lg border border-slate-300 dark:border-slate-700 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                            Reset to Default
-                        </button>
-<button class="px-8 h-12 rounded-lg bg-primary text-white text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20">
-                            Save Configuration
-                        </button>
+<!-- Widget 2: Confidence Metric -->
+<div class="bg-surface-container-high border border-outline-variant rounded p-4 flex flex-col justify-center items-center">
+<h3 class="font-mono-label text-mono-label text-on-surface-variant mb-2">Average AI Confidence</h3>
+<div class="text-[48px] font-bold text-primary leading-none tracking-tighter">91.4%</div>
+<p class="text-[10px] text-primary mt-2 font-mono-label flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="trending_up">trending_up</span>
+                            +2.1% from last week
+                        </p>
+</div>
+<!-- Widget 3: Performance Sparkline -->
+<div class="bg-surface-container-high border border-outline-variant rounded p-4">
+<h3 class="font-mono-label text-mono-label text-on-surface-variant mb-4 flex items-center justify-between">
+                            Model Performance (Latency)
+                            <span class="material-symbols-outlined text-[16px]" data-icon="bolt">bolt</span>
+</h3>
+<div class="h-16 flex items-end gap-1 px-1">
+<!-- Mock Sparkline -->
+<div class="flex-1 bg-primary/20 rounded-t h-[40%]"></div>
+<div class="flex-1 bg-primary/30 rounded-t h-[55%]"></div>
+<div class="flex-1 bg-primary/25 rounded-t h-[45%]"></div>
+<div class="flex-1 bg-primary/40 rounded-t h-[65%]"></div>
+<div class="flex-1 bg-primary/50 rounded-t h-[80%]"></div>
+<div class="flex-1 bg-primary/45 rounded-t h-[75%]"></div>
+<div class="flex-1 bg-primary/60 rounded-t h-[90%]"></div>
+<div class="flex-1 bg-primary/55 rounded-t h-[85%]"></div>
+<div class="flex-1 bg-primary/50 rounded-t h-[78%]"></div>
+<div class="flex-1 bg-primary/65 rounded-t h-[92%]"></div>
+</div>
+<div class="flex justify-between mt-2 font-mono-label text-[9px] text-on-surface-variant">
+<span>12ms</span>
+<span>42ms</span>
 </div>
 </div>
 </div>
+</footer>
 </main>
 </div>
+<!-- Micro-interaction JS -->
+<script>
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('bg-surface-bright/50');
+                setTimeout(() => row.classList.remove('bg-surface-bright/50'), 300);
+            });
+        });
+
+        // Simple mock refresh effect
+        const refreshBtn = document.querySelector('button:has(span[data-icon="refresh"])');
+        refreshBtn.addEventListener('click', () => {
+            const icon = refreshBtn.querySelector('span');
+            icon.style.transition = 'transform 0.5s ease';
+            icon.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                icon.style.transform = 'rotate(0deg)';
+                alert('Data updated successfully');
+            }, 500);
+        });
+    </script>
 </body></html>
