@@ -96,42 +96,9 @@
             },
         }
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body {
-            background-color: #0b1326;
-            color: #dae2fd;
-            -webkit-font-smoothing: antialiased;
-        }
-        input[type="range"]::-webkit-slider-runnable-track {
-            background: #3c4a42;
-            height: 4px;
-            border-radius: 2px;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: #4edea3;
-            margin-top: -6px;
-            box-shadow: 0 0 8px rgba(78, 222, 163, 0.4);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #131b2e;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 3px;
-        }
-    </style>
+<link rel="stylesheet" href="style.css">
 </head>
-<body class="font-body-lg text-body-lg overflow-hidden">
+<body class="bg-background text-on-surface font-body-lg text-body-lg min-h-screen overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
 <!-- TopNavBar -->
 <header class="fixed top-0 w-full z-50 bg-surface-container dark:bg-surface-container border-b border-outline-variant flex justify-between items-center px-gutter h-16">
 <div class="flex items-center gap-4">
@@ -367,46 +334,6 @@
 <p class="text-xs text-on-surface-variant">System Unit 01-Alpha has been updated.</p>
 </div>
 </div>
-<script>
-        // Micro-interaction for Threshold Slider
-        const slider = document.getElementById('threshold-slider');
-        const sliderVal = document.getElementById('threshold-val');
-        
-        slider.addEventListener('input', (e) => {
-            sliderVal.textContent = `${e.target.value}%`;
-            // Dynamic color shift logic mentioned in Brand Anchors
-            if(e.target.value < 50) {
-                sliderVal.className = 'font-mono-label text-headline-sm text-error';
-            } else if(e.target.value < 80) {
-                sliderVal.className = 'font-mono-label text-headline-sm text-secondary';
-            } else {
-                sliderVal.className = 'font-mono-label text-headline-sm text-primary';
-            }
-        });
-
-        // Save Interaction
-        const saveBtn = document.querySelector('button:contains("SAVE CONFIGURATION")') || document.querySelector('.bg-primary');
-        const toast = document.getElementById('save-toast');
-
-        saveBtn.addEventListener('click', () => {
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-                toast.classList.remove('translate-y-0', 'opacity-100');
-            }, 3000);
-        });
-
-        // Hover atmosphere effect for sections
-        const sections = document.querySelectorAll('section');
-        sections.forEach(section => {
-            section.addEventListener('mouseenter', () => {
-                section.querySelector('.bg-surface-container').classList.add('border-primary/50');
-            });
-            section.addEventListener('mouseleave', () => {
-                section.querySelector('.bg-surface-container').classList.remove('border-primary/50');
-            });
-        });
+<script src="app.js"></script>
     </script>
 </body></html>

@@ -94,18 +94,8 @@
         },
       }
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-        }
-        body { background-color: #0b1326; color: #dae2fd; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #131b2e; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
-        .status-glow-emerald { box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
-        .status-glow-crimson { box-shadow: 0 0 8px rgba(244, 63, 94, 0.2); }
-    </style>
+<link rel="stylesheet" href="style.css">
+
 </head>
 <body class="font-body-lg text-body-lg overflow-hidden h-screen flex flex-col">
 <!-- TopAppBar -->
@@ -387,25 +377,6 @@
 </footer>
 </main>
 </div>
-<!-- Micro-interaction JS -->
-<script>
-        document.querySelectorAll('tr').forEach(row => {
-            row.addEventListener('click', () => {
-                row.classList.add('bg-surface-bright/50');
-                setTimeout(() => row.classList.remove('bg-surface-bright/50'), 300);
-            });
-        });
 
-        // Simple mock refresh effect
-        const refreshBtn = document.querySelector('button:has(span[data-icon="refresh"])');
-        refreshBtn.addEventListener('click', () => {
-            const icon = refreshBtn.querySelector('span');
-            icon.style.transition = 'transform 0.5s ease';
-            icon.style.transform = 'rotate(360deg)';
-            setTimeout(() => {
-                icon.style.transform = 'rotate(0deg)';
-                alert('Data updated successfully');
-            }, 500);
-        });
-    </script>
+<script> src="app.js" </script>
 </body></html>
