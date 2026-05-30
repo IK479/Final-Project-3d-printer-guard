@@ -112,3 +112,35 @@ if (refreshBtn) {
         }
     });
 }
+
+/* =========================================
+      Emergency Stop Logic
+   ========================================= */
+// חיפוש כל הכפתורים שמכילים את הטקסט EMERGENCY STOP
+const emergencyBtns = document.querySelectorAll('button');
+
+emergencyBtns.forEach(btn => {
+    if (btn.textContent.includes('EMERGENCY STOP')) {
+        btn.addEventListener('click', async () => {
+            // הוספת חלון אישור כדי למנוע עצירה בטעות
+            const confirmStop = confirm('⚠️ URGENT ACTION: Are you sure you want to abort the current print?');
+            
+            if (confirmStop) {
+                try {
+                    // קריאה לשרת ה-FastAPI שלנו
+                    const response = await fetch('/printer/emergency-stop', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        alert('✅ EMERGENCY STOP INITIATED.\nPrinter has been successfully halted.');
+                    } else {
+                        alert('❌ ERROR: Could not halt printer.\n' + result.message);
+                    }
+                } catch (error) {
+                    console.error("Error triggering emergency stop:", error);
+                    alert('❌ SYSTEM ERROR: Failed to communicate with the Backend API.');
+                }
+            }
+        });
+    }
+});

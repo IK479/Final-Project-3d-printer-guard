@@ -4,7 +4,7 @@ from datetime import datetime
 from ultralytics import YOLO
 
 # 1. Loading the trained model
-MODEL_PATH = "model/best.pt"
+MODEL_PATH = "model/best.onnx"
 model = YOLO(MODEL_PATH)
 
 # The address of the FastAPI server
