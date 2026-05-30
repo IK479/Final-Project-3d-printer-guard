@@ -1,3 +1,7 @@
+# AI Models and heavy files
+models/
+test_image.webp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -60,6 +64,8 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+*.db
+*.sqlite3
 
 # Flask stuff:
 instance/
@@ -143,6 +149,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+venv/
+__pycache__/
 
 # Spyder project settings
 .spyderproject
