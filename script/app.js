@@ -16,14 +16,38 @@ document.querySelectorAll('button').forEach(btn => {
      Live Monitor
    ========================================= */
 const osdElements = document.querySelectorAll('.backdrop-blur-sm');
-// הבדיקה: רק אם אנחנו במסך שיש בו את נתוני הוידאו, תפעיל את הלופ
-if (osdElements.length >= 2) {
+// Test: Only if we are on a screen that has the video data, will the loop be activated.
+if (osdElements.length >= 3) {
   setInterval(() => {
-    const fps = (59 + Math.random() * 2).toFixed(1);
-    const latency = (10 + Math.random() * 5).toFixed(0);
+    const fps = (24 + Math.random() * 5).toFixed(1);
+    const latency = (30 + Math.random() * 15).toFixed(0);
     osdElements[0].innerText = `FPS: ${fps}`;
     osdElements[1].innerText = `LATENCY: ${latency}ms`;
+
+    const now = new Date();
+    const timeString = now.getFullYear() + "-" + 
+                       String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                       String(now.getDate()).padStart(2, '0') + " " + 
+                       String(now.getHours()).padStart(2, '0') + ":" + 
+                       String(now.getMinutes()).padStart(2, '0') + ":" + 
+                       String(now.getSeconds()).padStart(2, '0');
+                       
+    osdElements[2].innerText = timeString;
   }, 2000);
+
+  const tempEl = document.getElementById('nozzle-temp-val');
+    if (tempEl) {
+        const temp = (214 + Math.random() * 2).toFixed(1);
+        tempEl.innerText = `${temp}°C`;
+    }
+
+    // סימולציית זמן אינפרנס של מודל (בין 12 ל-25 מילי-שניות)
+    const infEl = document.getElementById('inference-time-val');
+    if (infEl) {
+        const infTime = (12 + Math.random() * 13).toFixed(1);
+        infEl.innerText = `${infTime}ms`;
+    }
+    
 }
 
 /* =========================================
@@ -116,18 +140,18 @@ if (refreshBtn) {
 /* =========================================
       Emergency Stop Logic
    ========================================= */
-// חיפוש כל הכפתורים שמכילים את הטקסט EMERGENCY STOP
+// Search for all buttons that contain the text EMERGENCY STOP
 const emergencyBtns = document.querySelectorAll('button');
 
 emergencyBtns.forEach(btn => {
     if (btn.textContent.includes('EMERGENCY STOP')) {
         btn.addEventListener('click', async () => {
-            // הוספת חלון אישור כדי למנוע עצירה בטעות
+            // Added a confirmation window to prevent accidental stopping
             const confirmStop = confirm('⚠️ URGENT ACTION: Are you sure you want to abort the current print?');
             
             if (confirmStop) {
                 try {
-                    // קריאה לשרת ה-FastAPI שלנו
+                    // Calling our FastAPI server
                     const response = await fetch('/printer/emergency-stop', { method: 'POST' });
                     const result = await response.json();
                     
@@ -144,3 +168,134 @@ emergencyBtns.forEach(btn => {
         });
     }
 });
+
+/* =========================================
+   Live Dashboard - Hardware Stream Controls
+   ========================================= */
+
+const startStreamBtn = document.getElementById('start-stream-btn');
+const stopCaptureBtn = document.getElementById('stop-capture-btn');
+const liveFeedImg = document.getElementById('live-feed-img'); // תגית ה-<img> בתוך מסך המעקב
+
+if (startStreamBtn) {
+    startStreamBtn.addEventListener('click', async () => {
+        try {
+            // 1. Opening a new print session in the database
+            const response = await fetch('/session/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ printer_name: "Unit 01-Alpha", filament_type: "PLA" })
+            });
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                alert('🟢 Live Hardware Monitoring Started!');
+                
+                // 2. Connecting the canvas to the hardware stream in real time
+                if (liveFeedImg) {
+                    // Setting the src triggers a persistent GET request to the video streaming path
+                    liveFeedImg.src = '/video_feed'; 
+                }
+            } else {
+                alert('⚠️ ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error starting hardware session:', error);
+        }
+    });
+}
+
+if (stopCaptureBtn) {
+    stopCaptureBtn.addEventListener('click', async () => {
+        try {
+            // 1. Calling the API to end the session (updates the Backend)
+            await fetch('/session/stop', { method: 'POST' });
+            
+            // 2. Secure stopping and disconnecting of the current at the interface
+            if (liveFeedImg) {
+                liveFeedImg.src = ''; 
+            }
+            alert('🔴 Camera Capture Stopped.');
+        } catch (error) {
+            console.error('Error stopping capture:', error);
+        }
+    });
+}
+
+
+/* =========================================
+   Live Alerts System (WebSocket)
+   ========================================= */
+// 1. Connecting to the server's open WebSocket channel
+const ws = new WebSocket("ws://127.0.0.1:8000/ws/alerts");
+
+ws.onmessage = function(event) {
+    const alertData = JSON.parse(event.data);
+    
+    if (alertData.type === "NEW_ALERT") {
+        console.log("🚨 ALERT RECEIVED FROM AI:", alertData.defect_type, alertData.confidence);
+        
+        // 2. Making the video frame red and glowing
+        const liveFeedImg = document.getElementById('live-feed-img');
+        if (liveFeedImg) {
+            // Grab the DIV that wraps the image to apply the frame to it
+            const container = liveFeedImg.parentElement;
+            
+            // Replacing the regular design with an emergency design
+            container.classList.remove('border-outline-variant');
+            container.classList.add('border-error', 'border-4', 'status-glow-error');
+            
+            // Reset to normal after 8 seconds so the screen doesn't stay red forever
+            setTimeout(() => {
+                container.classList.remove('border-error', 'border-4', 'status-glow-error');
+                container.classList.add('border-outline-variant');
+            }, 8000);
+        }
+        
+        // 3. Update the Recent Alerts counter in the sidebar
+        // Find the tag that says "4 NEW" and change its number and color
+        const alertBadge = Array.from(document.querySelectorAll('span')).find(
+            el => el.textContent.includes('NEW') && el.classList.contains('text-status-badge')
+        );
+        
+        if (alertBadge) {
+            const currentCount = parseInt(alertBadge.textContent);
+            if (!isNaN(currentCount)) {
+                alertBadge.textContent = `${currentCount + 1} NEW`;
+                
+                // Change the meter color to bright red
+                alertBadge.classList.replace('bg-surface-variant', 'bg-error');
+                alertBadge.classList.replace('text-on-surface-variant', 'text-on-error');
+                
+                // Turns back to gray after 8 seconds
+                setTimeout(() => {
+                    alertBadge.classList.replace('bg-error', 'bg-surface-variant');
+                    alertBadge.classList.replace('text-on-error', 'text-on-surface-variant');
+                }, 8000);
+            }
+        }
+    }
+};
+
+ws.onerror = function(error) {
+    console.error("WebSocket Error:", error);
+};
+
+function addSystemLog(message, status = 'OK') {
+    const logContainer = document.getElementById('system-log');
+    if (!logContainer) return;
+
+    const timeString = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const statusColor = status === 'ERROR' || status === 'ALERT' ? 'text-error' : 'text-primary';
+
+    const logEntry = document.createElement('div');
+    logEntry.className = 'flex justify-between border-b border-outline-variant/30 py-1';
+    logEntry.innerHTML = `
+        <span>[${timeString}] ${message}</span>
+        <span class="${statusColor}">${status}</span>
+    `;
+
+    logContainer.appendChild(logEntry);
+    // Automatic scrolling down to always see the new message
+    logContainer.scrollTop = logContainer.scrollHeight; 
+}

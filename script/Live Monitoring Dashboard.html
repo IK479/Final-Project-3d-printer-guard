@@ -211,27 +211,7 @@
 </div>
 <!-- Video Feed Area -->
 <div class="relative flex-1 bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden group">
-<img alt="3D Printer Monitoring" class="w-full h-full object-cover opacity-80" data-alt="A high-angle close-up shot of a professional 3D printer nozzle extruding material onto a complex grey part. The lighting is cold and clinical, typical of an industrial lab, with sharp shadows and technical precision. The color palette is dominated by deep blues, greys, and blacks, with bright highlight glints on the metallic surfaces of the print head. The atmosphere is quiet, focused, and technologically advanced." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0iuIMFYswxNZ8OX-RByMWYU_BGkyHFW0fgJXFezQrqmf-iLdd4LK8fAKpZQoPSojSVsFInZvNzaAietRoW77A7gXEPHxDnaCUsSqSooYtWwHewTFSa00FcLJwYVPSEOjDIDdwKjrgNOTJLWeDYqEGw3Mip19Sz1HlzQCTYXImnqVtoepPMvnxz7oF_3RurBOdSRIR1VK-id1Z5CowuRsqlAUdclumAkdfiiApwWlc2YJJyIp0QYgzusCVbmjcTNrG8OZ7m7p9SA"/>
-<!-- YOLO Overlays -->
-<div class="absolute inset-0 pointer-events-none">
-<!-- Spaghetti Defect Box -->
-<div class="yolo-box border-error absolute left-[15%] top-[25%] w-[180px] h-[140px] status-glow-error bg-error/10">
-<div class="absolute -top-6 left-0 bg-error text-on-error px-2 py-0.5 font-mono-label text-status-badge flex items-center gap-1">
-<span>DEFECT: SPAGHETTI</span>
-<span class="opacity-80">94.2%</span>
-</div>
-<div class="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 border-error"></div>
-<div class="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-error"></div>
-</div>
-<!-- Stringing Defect Box -->
-<div class="yolo-box border-secondary-container absolute right-[20%] bottom-[30%] w-[120px] h-[100px] bg-secondary-container/10">
-<div class="absolute -top-6 left-0 bg-secondary-container text-on-secondary-container px-2 py-0.5 font-mono-label text-status-badge flex items-center gap-1">
-<span>DEFECT: STRINGING</span>
-<span class="opacity-80">82.7%</span>
-</div>
-<div class="absolute top-0 left-0 w-2 h-2 border-l border-t border-secondary"></div>
-</div>
-</div>
+<img id="live-feed-img" alt="3D Printer Monitoring" class="w-full h-full object-cover opacity-80" data-alt="A high-angle close-up shot of a professional 3D printer nozzle extruding material onto a complex grey part. The lighting is cold and clinical, typical of an industrial lab, with sharp shadows and technical precision. The color palette is dominated by deep blues, greys, and blacks, with bright highlight glints on the metallic surfaces of the print head. The atmosphere is quiet, focused, and technologically advanced." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0iuIMFYswxNZ8OX-RByMWYU_BGkyHFW0fgJXFezQrqmf-iLdd4LK8fAKpZQoPSojSVsFInZvNzaAietRoW77A7gXEPHxDnaCUsSqSooYtWwHewTFSa00FcLJwYVPSEOjDIDdwKjrgNOTJLWeDYqEGw3Mip19Sz1HlzQCTYXImnqVtoepPMvnxz7oF_3RurBOdSRIR1VK-id1Z5CowuRsqlAUdclumAkdfiiApwWlc2YJJyIp0QYgzusCVbmjcTNrG8OZ7m7p9SA"/>
 <!-- OSD Overlays -->
 <div class="absolute top-4 right-4 flex flex-col gap-1 items-end">
 <div class="bg-black/60 px-3 py-1 rounded font-mono-label text-status-badge text-primary backdrop-blur-sm border border-primary/20">
@@ -246,10 +226,10 @@
 </div>
 <!-- Playback Controls Over Video -->
 <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 bg-surface-container-high/90 backdrop-blur-md rounded-full border border-outline-variant shadow-2xl transition-transform group-hover:translate-y-0 translate-y-4 opacity-0 group-hover:opacity-100 duration-300">
-<button class="w-10 h-10 flex items-center justify-center rounded-full bg-error text-white hover:scale-110 transition-transform active:scale-95" title="Stop Capture">
+<button id="stop-capture-btn" class="w-10 h-10 flex items-center justify-center rounded-full bg-error text-white hover:scale-110 transition-transform active:scale-95" title="Stop Capture">
 <span class="material-symbols-outlined" data-icon="stop" style="font-variation-settings: 'FILL' 1;">stop</span>
 </button>
-<button class="w-12 h-12 flex items-center justify-center rounded-full bg-primary text-on-primary hover:scale-110 transition-transform active:scale-95" title="Start Capture">
+<button id="start-stream-btn" class="w-12 h-12 flex items-center justify-center rounded-full bg-primary text-on-primary hover:scale-110 transition-transform active:scale-95" title="Start Capture">
 <span class="material-symbols-outlined text-3xl" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
 </button>
 <div class="w-px h-6 bg-outline-variant"></div>
@@ -281,7 +261,7 @@
 <div class="bg-surface-container-high border border-outline-variant p-3 rounded-lg">
 <p class="font-mono-label text-status-badge text-on-surface-variant uppercase mb-1">Nozzle Temp</p>
 <div class="flex items-center justify-between mb-2">
-<span class="font-display-lg text-headline-sm text-secondary">215°C</span>
+<span id="nozzle-temp-val" class="font-display-lg text-headline-sm text-secondary">215°C</span>
 <span class="material-symbols-outlined text-secondary text-sm" data-icon="device_thermostat">device_thermostat</span>
 </div>
 <div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden">
@@ -291,7 +271,7 @@
 <div class="bg-surface-container-high border border-outline-variant p-3 rounded-lg">
 <p class="font-mono-label text-status-badge text-on-surface-variant uppercase mb-1">Inference Time</p>
 <div class="flex items-center justify-between mb-2">
-<span class="font-display-lg text-headline-sm text-white">4.2ms</span>
+<span id="inference-time-val" class="font-display-lg text-headline-sm text-white">4.2ms</span>
 <span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="speed">speed</span>
 </div>
 <div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden">
@@ -381,7 +361,7 @@
 <!-- Action Log Footer -->
 <div class="p-4 bg-surface-container-lowest border-t border-outline-variant">
 <h4 class="font-mono-label text-status-badge text-on-surface-variant uppercase mb-3">System Log</h4>
-<div class="space-y-1 font-mono-label text-[10px] text-on-surface-variant h-24 overflow-y-auto">
+<div id="system-log" class="space-y-1 font-mono-label text-[10px] text-on-surface-variant h-24 overflow-y-auto">
 <div class="flex justify-between border-b border-outline-variant/30 py-1">
 <span>[SYS] Capture loop initiated...</span>
 <span class="text-primary">OK</span>
@@ -403,27 +383,5 @@
 </aside>
 </main>
 <!-- Interaction Scripts -->
-<script>
-    // Simple micro-interactions for the dashboard
-    document.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const icon = this.querySelector('.material-symbols-outlined');
-        if (icon) {
-          icon.classList.add('scale-125');
-          setTimeout(() => icon.classList.remove('scale-125'), 150);
-        }
-      });
-    });
-
-    // Simulated status pulse
-    setInterval(() => {
-      const fps = (59 + Math.random() * 2).toFixed(1);
-      const latency = (10 + Math.random() * 5).toFixed(0);
-      const osdElements = document.querySelectorAll('.backdrop-blur-sm');
-      if (osdElements.length >= 2) {
-        osdElements[0].innerText = `FPS: ${fps}`;
-        osdElements[1].innerText = `LATENCY: ${latency}ms`;
-      }
-    }, 2000);
-  </script>
+<script src="app.js"></script>
 </body></html>

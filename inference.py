@@ -1,100 +1,114 @@
 import cv2
+import time
 import requests
 from datetime import datetime
 from ultralytics import YOLO
 
+from database import get_db_connection
+
 # 1. Loading the trained model
 MODEL_PATH = "model/best.onnx"
-model = YOLO(MODEL_PATH)
+try:
+    model = YOLO(MODEL_PATH)
+    print(f"[System] YOLO Model loaded successfully from {MODEL_PATH}")
+except Exception as e:
+    print(f"[System] Critical Error loading YOLO model: {e}")
+    model = None
+
+# Variables for managing the physical camera
+last_alert_time = 0
+camera_active = False
+cap = None
 
 # The address of the FastAPI server
 API_ENDPOINT = "http://127.0.0.1:8000/internal/detection"
 SESSION_ID = 1 # We will temporarily use a permanent session, until we dynamically pull the active session.
 
-# Path to the test image
-IMAGE_PATH = r"c:\3d-print-defect-detect\test_image.webp"
-
-# 2. Opening the camera (0 represents the original laptop/raspberry camera)
-cap = cv2.VideoCapture(0)
-
-print("Starting Inference Service... Press 'q' to stop.")
-
-# Reading the static image instead of the camera
-frame = cv2.imread(IMAGE_PATH)
-if frame is None:
-    print(f"Error: Could not load image at {IMAGE_PATH}. Check if the file exists.")
-else:
-    while True:
-        # Transferring the frame to the YOLO model
-        results = model(frame, verbose=False)
+def get_active_session_id():
+    # פונקציית עזר למשיכת הסשן הפעיל האחרון
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM sessions ORDER BY id DESC LIMIT 1")
+        row = cursor.fetchone()
+        return row[0] if row else 1
+    
+def generate_video_frames():
+    global last_alert_time, camera_active, cap, current_session_id
+    # Direct hardware connection
+    # 0 represents the camera connected via USB or the board's camera port
+    if cap is None or not cap.isOpened():
+        cap = cv2.VideoCapture(0)
         
-        for result in results:
-            boxes = result.boxes
-            for box in boxes:
-                confidence = float(box.conf[0])
-                class_id = int(box.cls[0])
-                defect_type = model.names[class_id]
-                
-                # If the security is high enough, an alert will be sent.
-                if confidence > 0.80:
-                    payload = {
-                        "session_id": SESSION_ID,
-                        "defect_type": defect_type,
-                        "confidence": confidence,
-                        "timestamp": datetime.now().isoformat()
-                    }
-                    
-                    try:
-                        print(f"Sending alert: {defect_type} ({confidence*100:.1f}%)")
-                        requests.post(API_ENDPOINT, json=payload)
-                    except requests.exceptions.ConnectionError:
-                        print("Error: Could not connect to FastAPI server.")
+    if not cap.isOpened():
+        print("Hardware Error: Camera not detected.")
+        return
 
-        # Displaying the analyzed image on the screen
-        annotated_frame = results[0].plot()
-        cv2.imshow("Aegis Print Guard - Simulation", annotated_frame)
+    camera_active = True
+    print("Hardware camera streaming started...")
 
-        # Wait 2 seconds between "frames" to avoid flooding the server, or exit by pressing q
-        if cv2.waitKey(2000) & 0xFF == ord('q'):
+    while camera_active:
+        success, frame = cap.read()
+        if not success:
+            print("Warning: Dropped frame from hardware.")
             break
 
-# while cap.isOpened():
-#     success, frame = cap.read()
-#     if not success:
-#         break
+        # 1. Hard resolution change to 640x640
+        frame_resized = cv2.resize(frame, (640, 640))
+        # 2. Convert color channels from OpenCV's BGR format to RGB format for the model
+        frame_rgb = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)
 
-#     # 3. Transferring the frame to the YOLO model
-#     results = model(frame, verbose=False)
-    
-#     for result in results:
-#         boxes = result.boxes
-#         for box in boxes:
-#             # Obtaining the confidence percentage and defect type from the model
-#             confidence = float(box.conf[0])
-#             class_id = int(box.cls[0])
-#             defect_type = model.names[class_id] # 'Spaghetti' or 'Stringing'
+        # --- Inference phase vs. YOLO model ---
+        if model is not None:
+            #Transfer the frame to the model adapted to the three classes (Normal, Spaghetti, Stringing)
+            results = model(frame_rgb, verbose=False)
+            # Extracting the coordinates of the bounding square for drawing in the interface
+            # Ultralytics' plot function automatically draws them (and returns a BGR array ready for broadcast)
+            annotated_frame = results[0].plot()
+
+            highest_conf = 0.0
+            defect_type = "Normal"
             
-#             # If the confidence is higher than 80%, a report is sent to the server
-#             if confidence > 0.80:
-#                 payload = {
-#                     "session_id": SESSION_ID,
-#                     "defect_type": defect_type,
-#                     "confidence": confidence,
-#                     "timestamp": datetime.now().isoformat()
-#                 }
+            for box in results[0].boxes:
+                conf = float(box.conf[0])
+                cls_id = int(box.cls[0])
+                label = model.names[cls_id]
                 
-#                 try:
-#                     # Transmitting data to the FastAPI server we created earlier
-#                     requests.post(API_ENDPOINT, json=payload)
-#                 except requests.exceptions.ConnectionError:
-#                     print("Error: Could not connect to FastAPI server.")
+                if label != "Normal" and conf > highest_conf:
+                    highest_conf = conf
+                    defect_type = label
+                    
+            # --- Alerting Engine Phase ---
+            # Overflow prevention mechanism: sends an alert only once every 10 seconds even if there is a sequence of detections
+            if highest_conf > 0.85 and (time.time() - last_alert_time > 10):
+                last_alert_time = time.time()
+                # Pulling the active session securely directly from the database
+                active_session = get_active_session_id()
+                payload = {
+                    "session_id": active_session,
+                    "defect_type": defect_type,
+                    "confidence": highest_conf,
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+                try:
+                    requests.post("http://127.0.0.1:8000/internal/detection", json=payload, timeout=2)
+                except Exception as e:
+                    print(f"Failed to trigger alert: {e}")
+        else:
+            annotated_frame = frame_resized
 
-#     # Displaying the video on the screen for development and testing purposes
-#     annotated_frame = results[0].plot()
-#     cv2.imshow("Aegis Print Guard - Camera Feed", annotated_frame)
-
-#     if cv2.waitKey(1) & 0xFF == ord('q'):
-#         break
-
-# cap.release()
+        # Encoding the processed frame to JPEG for streaming in the Web interface
+        ret, buffer = cv2.imencode('.jpg', annotated_frame)
+        if ret:
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            
+    # Releasing hardware resources at the end of streams
+    if cap is not None:
+        cap.release()
+        cap = None
 cv2.destroyAllWindows()
+
+if cap is not None:
+        cap.release()
+        cap = None
