@@ -283,13 +283,12 @@ function addDynamicAlert(defectType, confidence) {
     const alertsFeed = document.getElementById('alerts-feed');
     if (!alertsFeed) return;
 
-    // המרת הביטחון לאחוזים (למשל מ-0.94 ל-94.2)
+    // Converting confidence to percentage
     const confidencePercent = (confidence * 100).toFixed(1);
     
-    // קביעת חומרת ההתראה (Critical מעל 90%, Warning מתחת)
+    // Setting the alert severity
     const isCritical = confidence > 0.90;
-    
-    // הגדרת הצבעים והטקסטים בהתאם לעיצוב Tailwind שלך
+
     const severityText = isCritical ? 'CRITICAL' : 'WARNING';
     const bgClass = isCritical ? 'bg-error-container/10 border-error/30' : 'bg-surface-container-high border-outline-variant';
     const hoverClass = isCritical ? 'hover:bg-error-container/20' : 'hover:bg-surface-variant';
@@ -298,14 +297,14 @@ function addDynamicAlert(defectType, confidence) {
     const barColor = isCritical ? 'bg-error' : 'bg-secondary-container';
     const textColor = isCritical ? 'text-error' : 'text-secondary';
     
-    // יצירת חותמת הזמן הנוכחית (HH:MM:SS)
+    // Creating the current timestamp (HH:MM:SS)
     const timeString = new Date().toLocaleTimeString('en-US', { hour12: false });
 
-    // יצירת האלמנט החדש
+    // Creating the new element
     const alertDiv = document.createElement('div');
     alertDiv.className = `p-3 border rounded-lg group cursor-pointer transition-all ${bgClass} ${hoverClass}`;
     
-    // הזרקת ה-HTML פנימה עם הנתונים המשתנים
+    // Injecting the HTML with the variable data
     alertDiv.innerHTML = `
         <div class="flex items-center justify-between mb-2">
             <span class="px-2 py-0.5 ${badgeBg} ${badgeText} font-mono-label text-status-badge rounded">${severityText}</span>
@@ -320,10 +319,10 @@ function addDynamicAlert(defectType, confidence) {
         </div>
     `;
 
-    // הוספת ההתראה החדשה לראש הרשימה
+    // Add the new alert to the top of the list
     alertsFeed.prepend(alertDiv);
     
-    // אופציונלי: שמירה על מקסימום 50 התראות כדי לא לתקוע את הדפדפן
+    // Keeping a maximum of 50 notifications to avoid clogging up the browser
     if (alertsFeed.children.length > 50) {
         alertsFeed.removeChild(alertsFeed.lastChild);
     }
@@ -346,4 +345,63 @@ function addSystemLog(message, status = 'OK') {
     logContainer.appendChild(logEntry);
     // Automatic scrolling down to always see the new message
     logContainer.scrollTop = logContainer.scrollHeight; 
+}
+
+/* =========================================
+   Video Player Interactions (Zoom, Grid, Snapshot)
+   ========================================= */
+let currentZoom = 1;
+const zoomInBtn = document.getElementById('zoom-in-btn');
+const zoomOutBtn = document.getElementById('zoom-out-btn');
+const snapshotBtn = document.getElementById('snapshot-btn');
+const toggleGridBtn = document.getElementById('toggle-grid-btn');
+const videoContainer = liveFeedImg ? liveFeedImg.parentElement : null;
+
+// Zoom In
+if (zoomInBtn && liveFeedImg) {
+    zoomInBtn.addEventListener('click', () => {
+        if (currentZoom < 3) currentZoom += 0.2;
+        liveFeedImg.style.transform = `scale(${currentZoom})`;
+        liveFeedImg.style.transition = 'transform 0.3s ease';
+    });
+}
+
+// Zoom Out
+if (zoomOutBtn && liveFeedImg) {
+    zoomOutBtn.addEventListener('click', () => {
+        if (currentZoom > 1) currentZoom -= 0.2;
+        liveFeedImg.style.transform = `scale(${currentZoom})`;
+    });
+}
+
+// Snapshot with Flash effect
+if (snapshotBtn) {
+    snapshotBtn.addEventListener('click', () => {
+        if (videoContainer) {
+            // Create a white flash element
+            const flash = document.createElement('div');
+            flash.className = 'absolute inset-0 bg-white opacity-80 z-50 transition-opacity duration-300';
+            videoContainer.appendChild(flash);
+            
+            // Fade it out
+            setTimeout(() => flash.classList.remove('opacity-80'), 50);
+            setTimeout(() => flash.classList.add('opacity-0'), 100);
+            setTimeout(() => flash.remove(), 400);
+        }
+        // Log it to the system
+        addSystemLog('Snapshot saved successfully', 'OK');
+    });
+}
+
+// Toggle Grid Overlay
+if (toggleGridBtn && videoContainer) {
+    toggleGridBtn.addEventListener('click', () => {
+        videoContainer.classList.toggle('grid-bg');
+        
+        // Toggle the icon
+        const icon = toggleGridBtn.querySelector('span');
+        if (icon) {
+            icon.innerText = icon.innerText === 'grid_on' ? 'grid_off' : 'grid_on';
+        }
+    });
 }

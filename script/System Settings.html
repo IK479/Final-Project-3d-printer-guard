@@ -107,7 +107,7 @@
 <span class="font-headline-sm text-headline-sm text-on-surface-variant">System Settings</span>
 </div>
 <div class="flex items-center gap-x-2">
-<button class="p-2 text-on-surface-variant hover:bg-surface-variant transition-colors rounded-lg active:scale-95 duration-100">
+<button onclick="window.location.href='/history'" class="p-2 text-on-surface-variant hover:bg-surface-variant transition-colors rounded-lg active:scale-95 duration-100">
 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
 </button>
 <button class="p-2 text-primary font-bold bg-surface-variant transition-colors rounded-lg active:scale-95 duration-100">
@@ -147,14 +147,6 @@
 </a>
 </nav>
 <div class="mt-auto pt-4 border-t border-outline-variant space-y-1">
-<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150" href="#">
-<span class="material-symbols-outlined" data-icon="help">help</span>
-<span class="font-mono-label text-mono-label">Support</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150" href="#">
-<span class="material-symbols-outlined" data-icon="description">description</span>
-<span class="font-mono-label text-mono-label">Documentation</span>
-</a>
 <button class="w-full mt-4 bg-error-container text-on-error-container p-3 rounded-lg font-bold font-mono-label text-mono-label border border-error hover:bg-error hover:text-on-error transition-all active:translate-x-1 duration-150">
                 EMERGENCY STOP
             </button>
@@ -263,13 +255,7 @@
 </div>
 <div class="bg-surface-container rounded-lg p-6 border border-outline-variant space-y-6">
 <div class="space-y-2">
-<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Capture Path</label>
 <div class="flex gap-2">
-<input class="flex-1 bg-surface-container-high border border-outline-variant rounded p-3 text-on-surface text-sm font-mono focus:outline-none focus:border-primary" type="text" value="/mnt/aegis/records/unit_01"/>
-<button class="bg-surface-container-high border border-outline-variant px-3 rounded hover:bg-surface-variant transition-colors">
-<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
-</button>
-</div>
 </div>
 <div class="space-y-2">
 <div class="flex justify-between">
@@ -299,7 +285,7 @@
 </div>
 <!-- ACTION FOOTER -->
 <div class="flex justify-end items-center gap-4 mt-12 pt-8 border-t border-outline-variant">
-<button class="px-6 py-3 border border-outline-variant rounded-lg font-mono-label text-mono-label text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-95">
+<button onclick="if(confirm('Are you sure you want to reset all settings to factory defaults?')) location.reload();" class="px-6 py-3 border border-outline-variant rounded-lg font-mono-label text-mono-label text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-95">
                     RESET TO DEFAULT
                 </button>
 <button class="px-12 py-3 bg-primary text-on-primary-container rounded-lg font-bold font-mono-label text-mono-label shadow-[0_0_20px_rgba(78,222,163,0.3)] hover:brightness-110 transition-all active:scale-95 flex items-center gap-2">
