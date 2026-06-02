@@ -8,12 +8,9 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 from fastapi import BackgroundTasks
 import sqlite3
-import requests
+import inference
+import notification_service
 import asyncio
-import os
-import cv2
-import time
-import numpy as np
 import io
 import csv
 from dotenv import load_dotenv
@@ -39,13 +36,30 @@ async def purge_old_data():
             print(f"[System] Auto-purge error: {e}")
         await asyncio.sleep(86400)
 
+async def broadcast_telemetry():
+    while True:
+        try:
+            telemetry_data = {
+                "type": "TELEMETRY",
+                "fps": round(inference.current_fps, 1),
+                "inference_time": round(inference.current_inference_time, 1),
+            }
+            await manager.broadcast(telemetry_data)
+        except Exception as e:
+            print(f"[Telemetry Error] {e}")
+            pass
+        
+        await asyncio.sleep(2) # Transmits every two seconds to avoid overloading the network
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     purge_task = asyncio.create_task(purge_old_data())
     telegram_task = asyncio.create_task(telegram_bot_listener())
+    telemetry_task = asyncio.create_task(broadcast_telemetry())
     yield
     purge_task.cancel()
     telegram_task.cancel()
+    telemetry_task.cancel()
 
 app = FastAPI(title="Print Guard API", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])

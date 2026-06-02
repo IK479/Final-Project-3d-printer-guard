@@ -247,7 +247,7 @@
 </div>
 </div>
 <!-- Telemetry Bottom Row -->
-<div class="grid grid-cols-4 gap-4">
+<div class="grid grid-cols-3 gap-4">
 <div class="bg-surface-container-high border border-outline-variant p-3 rounded-lg">
 <p class="font-mono-label text-status-badge text-on-surface-variant uppercase mb-1">AI Confidence</p>
 <div class="flex items-center justify-between mb-2">
@@ -256,16 +256,6 @@
 </div>
 <div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden">
 <div class="h-full bg-primary w-[98%]"></div>
-</div>
-</div>
-<div class="bg-surface-container-high border border-outline-variant p-3 rounded-lg">
-<p class="font-mono-label text-status-badge text-on-surface-variant uppercase mb-1">Nozzle Temp</p>
-<div class="flex items-center justify-between mb-2">
-<span id="nozzle-temp-val" class="font-display-lg text-headline-sm text-secondary">215°C</span>
-<span class="material-symbols-outlined text-secondary text-sm" data-icon="device_thermostat">device_thermostat</span>
-</div>
-<div class="h-1 w-full bg-surface-variant rounded-full overflow-hidden">
-<div class="h-full bg-secondary w-3/4"></div>
 </div>
 </div>
 <div class="bg-surface-container-high border border-outline-variant p-3 rounded-lg">
@@ -315,49 +305,8 @@
 <span class="font-mono-label text-status-badge text-error">94.2%</span>
 </div>
 </div>
-<!-- Alert Item -->
-<div class="p-3 bg-surface-container-high border border-outline-variant rounded-lg group cursor-pointer hover:bg-surface-variant transition-all">
-<div class="flex items-center justify-between mb-2">
-<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-mono-label text-status-badge rounded">WARNING</span>
-<span class="font-mono-label text-[10px] text-on-surface-variant">14:38:22</span>
-</div>
-<p class="font-mono-label text-mono-label text-on-surface mb-2">Stringing Threshold Exceeded</p>
-<div class="flex items-center gap-3">
-<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden">
-<div class="h-full bg-secondary-container w-[82%]"></div>
-</div>
-<span class="font-mono-label text-status-badge text-secondary">82.7%</span>
-</div>
-</div>
-<!-- Alert Item -->
-<div class="p-3 bg-surface-container-high border border-outline-variant rounded-lg opacity-60">
-<div class="flex items-center justify-between mb-2">
-<span class="px-2 py-0.5 bg-outline-variant text-on-surface-variant font-mono-label text-status-badge rounded">RESOLVED</span>
-<span class="font-mono-label text-[10px] text-on-surface-variant">14:20:11</span>
-</div>
-<p class="font-mono-label text-mono-label text-on-surface mb-2">Nozzle Clog Warning</p>
-<div class="flex items-center gap-3">
-<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden">
-<div class="h-full bg-primary w-[12%]"></div>
-</div>
-<span class="font-mono-label text-status-badge text-on-surface-variant">12.1%</span>
-</div>
-</div>
-<!-- Alert Item -->
-<div class="p-3 bg-surface-container-high border border-outline-variant rounded-lg group cursor-pointer hover:bg-surface-variant transition-all">
-<div class="flex items-center justify-between mb-2">
-<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-mono-label text-status-badge rounded">WARNING</span>
-<span class="font-mono-label text-[10px] text-on-surface-variant">14:15:45</span>
-</div>
-<p class="font-mono-label text-mono-label text-on-surface mb-2">Layer Adhesion Inconsistency</p>
-<div class="flex items-center gap-3">
-<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden">
-<div class="h-full bg-secondary-container w-[76%]"></div>
-</div>
-<span class="font-mono-label text-status-badge text-secondary">76.4%</span>
-</div>
-</div>
-</div>
+<div id="alerts-feed" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar">
+    </div>
 <!-- Action Log Footer -->
 <div class="p-4 bg-surface-container-lowest border-t border-outline-variant">
 <h4 class="font-mono-label text-status-badge text-on-surface-variant uppercase mb-3">System Log</h4>

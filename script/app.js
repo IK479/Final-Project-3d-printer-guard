@@ -13,44 +13,6 @@ document.querySelectorAll('button').forEach(btn => {
 });
 
 /* =========================================
-     Live Monitor
-   ========================================= */
-const osdElements = document.querySelectorAll('.backdrop-blur-sm');
-// Test: Only if we are on a screen that has the video data, will the loop be activated.
-if (osdElements.length >= 3) {
-  setInterval(() => {
-    const fps = (24 + Math.random() * 5).toFixed(1);
-    const latency = (30 + Math.random() * 15).toFixed(0);
-    osdElements[0].innerText = `FPS: ${fps}`;
-    osdElements[1].innerText = `LATENCY: ${latency}ms`;
-
-    const now = new Date();
-    const timeString = now.getFullYear() + "-" + 
-                       String(now.getMonth() + 1).padStart(2, '0') + "-" + 
-                       String(now.getDate()).padStart(2, '0') + " " + 
-                       String(now.getHours()).padStart(2, '0') + ":" + 
-                       String(now.getMinutes()).padStart(2, '0') + ":" + 
-                       String(now.getSeconds()).padStart(2, '0');
-                       
-    osdElements[2].innerText = timeString;
-  }, 2000);
-
-  const tempEl = document.getElementById('nozzle-temp-val');
-    if (tempEl) {
-        const temp = (214 + Math.random() * 2).toFixed(1);
-        tempEl.innerText = `${temp}°C`;
-    }
-
-    // סימולציית זמן אינפרנס של מודל (בין 12 ל-25 מילי-שניות)
-    const infEl = document.getElementById('inference-time-val');
-    if (infEl) {
-        const infTime = (12 + Math.random() * 13).toFixed(1);
-        infEl.innerText = `${infTime}ms`;
-    }
-    
-}
-
-/* =========================================
       System Config
    ========================================= */
 // 1. Slider logic
@@ -175,7 +137,7 @@ emergencyBtns.forEach(btn => {
 
 const startStreamBtn = document.getElementById('start-stream-btn');
 const stopCaptureBtn = document.getElementById('stop-capture-btn');
-const liveFeedImg = document.getElementById('live-feed-img'); // תגית ה-<img> בתוך מסך המעקב
+const liveFeedImg = document.getElementById('live-feed-img'); 
 
 if (startStreamBtn) {
     startStreamBtn.addEventListener('click', async () => {
@@ -230,11 +192,29 @@ if (stopCaptureBtn) {
 const ws = new WebSocket("ws://127.0.0.1:8000/ws/alerts");
 
 ws.onmessage = function(event) {
-    const alertData = JSON.parse(event.data);
-    
-    if (alertData.type === "NEW_ALERT") {
-        console.log("🚨 ALERT RECEIVED FROM AI:", alertData.defect_type, alertData.confidence);
-        
+    const data = JSON.parse(event.data);
+    // 1. Handling New AI Detection Alerts (Spaghetti, etc.)    
+    if (data.type === "NEW_ALERT") {
+       handleNewAlert(data);
+    }
+    // 2. Handling Live Telemetry Data (FPS, Time)
+    else if (data.type === "TELEMETRY") {
+        handleTelemetry(data);
+    }
+};
+
+ws.onerror = function(error) {
+    console.error("WebSocket Error:", error);
+};
+
+// ====================================================
+//      Helper Functions 
+// ====================================================
+function handleNewAlert(data) {
+     console.log("🚨 ALERT RECEIVED FROM AI:", data.defect_type, data.confidence);
+        // Log the alert to the System Log panel
+        addSystemLog(`Detection: ${data.defect_type} (${(data.confidence * 100).toFixed(1)}%)`, 'ALERT');
+        addDynamicAlert(data.defect_type, data.confidence);
         // 2. Making the video frame red and glowing
         const liveFeedImg = document.getElementById('live-feed-img');
         if (liveFeedImg) {
@@ -274,12 +254,80 @@ ws.onmessage = function(event) {
                 }, 8000);
             }
         }
-    }
-};
+}
 
-ws.onerror = function(error) {
-    console.error("WebSocket Error:", error);
-};
+function handleTelemetry(data){
+    // Update OSD (On-Screen Display) elements directly on the video feed
+        const osdElements = document.querySelectorAll('.backdrop-blur-sm');
+        if (osdElements.length >= 3) {
+            osdElements[0].innerText = `FPS: ${data.fps}`;
+            
+            // Latency is simulated as minor network variations
+            osdElements[1].innerText = `LATENCY: ${Math.floor(Math.random() * 5 + 10)}ms`; 
+            
+            // Real-time system clock update (YYYY-MM-DD HH:MM:SS)
+            const now = new Date();
+            osdElements[2].innerText = now.getFullYear() + "-" + 
+                String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                String(now.getDate()).padStart(2, '0') + " " + 
+                String(now.getHours()).padStart(2, '0') + ":" + 
+                String(now.getMinutes()).padStart(2, '0') + ":" + 
+                String(now.getSeconds()).padStart(2, '0');
+        }
+
+        const infEl = document.getElementById('inference-time-val');
+        if (infEl) infEl.innerText = `${data.inference_time}ms`;
+}
+
+function addDynamicAlert(defectType, confidence) {
+    const alertsFeed = document.getElementById('alerts-feed');
+    if (!alertsFeed) return;
+
+    // המרת הביטחון לאחוזים (למשל מ-0.94 ל-94.2)
+    const confidencePercent = (confidence * 100).toFixed(1);
+    
+    // קביעת חומרת ההתראה (Critical מעל 90%, Warning מתחת)
+    const isCritical = confidence > 0.90;
+    
+    // הגדרת הצבעים והטקסטים בהתאם לעיצוב Tailwind שלך
+    const severityText = isCritical ? 'CRITICAL' : 'WARNING';
+    const bgClass = isCritical ? 'bg-error-container/10 border-error/30' : 'bg-surface-container-high border-outline-variant';
+    const hoverClass = isCritical ? 'hover:bg-error-container/20' : 'hover:bg-surface-variant';
+    const badgeBg = isCritical ? 'bg-error' : 'bg-secondary-container';
+    const badgeText = isCritical ? 'text-on-error' : 'text-on-secondary-container';
+    const barColor = isCritical ? 'bg-error' : 'bg-secondary-container';
+    const textColor = isCritical ? 'text-error' : 'text-secondary';
+    
+    // יצירת חותמת הזמן הנוכחית (HH:MM:SS)
+    const timeString = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+    // יצירת האלמנט החדש
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `p-3 border rounded-lg group cursor-pointer transition-all ${bgClass} ${hoverClass}`;
+    
+    // הזרקת ה-HTML פנימה עם הנתונים המשתנים
+    alertDiv.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+            <span class="px-2 py-0.5 ${badgeBg} ${badgeText} font-mono-label text-status-badge rounded">${severityText}</span>
+            <span class="font-mono-label text-[10px] text-on-surface-variant">${timeString}</span>
+        </div>
+        <p class="font-mono-label text-mono-label text-on-surface mb-2">${defectType} Detected</p>
+        <div class="flex items-center gap-3">
+            <div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden">
+                <div class="h-full ${barColor}" style="width: ${confidencePercent}%"></div>
+            </div>
+            <span class="font-mono-label text-status-badge ${textColor}">${confidencePercent}%</span>
+        </div>
+    `;
+
+    // הוספת ההתראה החדשה לראש הרשימה
+    alertsFeed.prepend(alertDiv);
+    
+    // אופציונלי: שמירה על מקסימום 50 התראות כדי לא לתקוע את הדפדפן
+    if (alertsFeed.children.length > 50) {
+        alertsFeed.removeChild(alertsFeed.lastChild);
+    }
+}
 
 function addSystemLog(message, status = 'OK') {
     const logContainer = document.getElementById('system-log');

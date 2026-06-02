@@ -20,6 +20,10 @@ last_alert_time = 0
 camera_active = False
 cap = None
 
+# Global variables for telemetry
+current_fps = 0.0
+current_inference_time = 0.0
+
 # The address of the FastAPI server
 API_ENDPOINT = "http://127.0.0.1:8000/internal/detection"
 SESSION_ID = 1 # We will temporarily use a permanent session, until we dynamically pull the active session.
@@ -28,12 +32,12 @@ def get_active_session_id():
     # פונקציית עזר למשיכת הסשן הפעיל האחרון
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM sessions ORDER BY id DESC LIMIT 1")
+        cursor.execute("SELECT session_id FROM sessions ORDER BY session_id DESC LIMIT 1")
         row = cursor.fetchone()
         return row[0] if row else 1
     
 def generate_video_frames():
-    global last_alert_time, camera_active, cap, current_session_id
+    global last_alert_time, camera_active, cap, current_fps, current_inference_time
     # Direct hardware connection
     # 0 represents the camera connected via USB or the board's camera port
     if cap is None or not cap.isOpened():
@@ -47,6 +51,7 @@ def generate_video_frames():
     print("Hardware camera streaming started...")
 
     while camera_active:
+        loop_start = time.time()
         success, frame = cap.read()
         if not success:
             print("Warning: Dropped frame from hardware.")
@@ -59,10 +64,13 @@ def generate_video_frames():
 
         # --- Inference phase vs. YOLO model ---
         if model is not None:
+            inf_start = time.time() # Start loop time measurement (FPS)
             #Transfer the frame to the model adapted to the three classes (Normal, Spaghetti, Stringing)
             results = model(frame_rgb, verbose=False)
-            # Extracting the coordinates of the bounding square for drawing in the interface
-            # Ultralytics' plot function automatically draws them (and returns a BGR array ready for broadcast)
+
+            # Calculate the time taken by the model (in milliseconds)
+            current_inference_time = (time.time() - inf_start) * 1000
+            # Extracting the coordinates of the bounding square for drawing
             annotated_frame = results[0].plot()
 
             highest_conf = 0.0
@@ -97,17 +105,14 @@ def generate_video_frames():
         else:
             annotated_frame = frame_resized
 
+        time_diff = time.time() - loop_start
+        if time_diff > 0:
+            current_fps = 1.0 / time_diff
         # Encoding the processed frame to JPEG for streaming in the Web interface
         ret, buffer = cv2.imencode('.jpg', annotated_frame)
         if ret:
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-            
-    # Releasing hardware resources at the end of streams
-    if cap is not None:
-        cap.release()
-        cap = None
-cv2.destroyAllWindows()
 
 if cap is not None:
         cap.release()
