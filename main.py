@@ -178,7 +178,7 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
     print(f"Received analysis for session {result.session_id}: {result.defect_type} ({result.confidence*100}%)")
 
     CONFIDENCE_THRESHOLD = 0.85
-    alert_created = result.confidence > CONFIDENCE_THRESHOLD
+    alert_created = result.confidence > CONFIDENCE_THRESHOLD and (result.defect_type.lower() != "normal")
 
     conn = get_db_connection()
 
@@ -230,6 +230,28 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
         "detection_id": last_detection_id
     }
 
+@app.get("/api/recent-alerts")
+async def get_recent_alerts():
+    # Retrieving the last 5 alerts (over 85% confidence) from the DB
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT defect_type, confidence, timestamp 
+            FROM detections 
+            WHERE confidence > 0.85
+            ORDER BY timestamp DESC LIMIT 5
+        ''')
+        rows = cursor.fetchall()
+        
+        alerts = []
+        for row in rows:
+            alerts.append({
+                "defect_type": row[0],
+                "confidence": row[1],
+                "timestamp": row[2]
+            })
+        return {"status": "success", "alerts": alerts}
+    
 @app.get("/api/export-csv")
 async def export_alerts_csv():
     with get_db_connection() as conn:

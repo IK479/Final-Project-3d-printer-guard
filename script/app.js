@@ -140,6 +140,7 @@ const stopCaptureBtn = document.getElementById('stop-capture-btn');
 const liveFeedImg = document.getElementById('live-feed-img'); 
 
 if (startStreamBtn) {
+    addSystemLog("Initializing camera hardware...", "SYS"); 
     startStreamBtn.addEventListener('click', async () => {
         try {
             // 1. Opening a new print session in the database
@@ -168,6 +169,7 @@ if (startStreamBtn) {
 }
 
 if (stopCaptureBtn) {
+    addSystemLog("Hardware stream terminated", "SYS"); 
     stopCaptureBtn.addEventListener('click', async () => {
         try {
             // 1. Calling the API to end the session (updates the Backend)
@@ -190,6 +192,9 @@ if (stopCaptureBtn) {
    ========================================= */
 // 1. Connecting to the server's open WebSocket channel
 const ws = new WebSocket("ws://127.0.0.1:8000/ws/alerts");
+ws.onopen = function() {
+    addSystemLog("Telemetry live stream established", "OK");
+};
 
 ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
@@ -274,9 +279,6 @@ function handleTelemetry(data){
                 String(now.getMinutes()).padStart(2, '0') + ":" + 
                 String(now.getSeconds()).padStart(2, '0');
         }
-
-        const infEl = document.getElementById('inference-time-val');
-        if (infEl) infEl.innerText = `${data.inference_time}ms`;
 }
 
 function addDynamicAlert(defectType, confidence) {
@@ -298,7 +300,12 @@ function addDynamicAlert(defectType, confidence) {
     const textColor = isCritical ? 'text-error' : 'text-secondary';
     
     // Creating the current timestamp (HH:MM:SS)
-    const timeString = new Date().toLocaleTimeString('en-US', { hour12: false });
+    let timeString;
+    if (providedTime) {
+        timeString = new Date(providedTime).toLocaleTimeString('en-US', { hour12: false });
+    } else {
+        timeString = new Date().toLocaleTimeString('en-US', { hour12: false });
+    }
 
     // Creating the new element
     const alertDiv = document.createElement('div');
@@ -327,6 +334,7 @@ function addDynamicAlert(defectType, confidence) {
         alertsFeed.removeChild(alertsFeed.lastChild);
     }
 }
+
 
 function addSystemLog(message, status = 'OK') {
     const logContainer = document.getElementById('system-log');
@@ -405,3 +413,32 @@ if (toggleGridBtn && videoContainer) {
         }
     });
 }
+
+/* =========================================
+   Dashboard Initialization (Recent Alerts & Logs)
+   ========================================= */
+async function loadInitialDashboardData() {
+    const alertsFeed = document.getElementById('alerts-feed');
+    if (!alertsFeed) return; // Ensures that it only runs on the dashboard screen
+
+    addSystemLog("Dashboard connected securely", "OK");
+
+    try {
+        const response = await fetch('/api/recent-alerts');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alertsFeed.innerHTML = ''; //Cleaning the feed
+            // Flip the array so that the newest is on top.
+            [...data.alerts].reverse().forEach(alert => {
+                addDynamicAlert(alert.defect_type, alert.confidence, alert.timestamp);
+            });
+            addSystemLog(`Loaded ${data.alerts.length} recent alerts from database`, "SYS");
+        }
+    } catch (error) {
+        addSystemLog("Failed to sync historical alerts", "ERROR");
+    }
+}
+
+// Running the function on page load
+document.addEventListener('DOMContentLoaded', loadInitialDashboardData);
