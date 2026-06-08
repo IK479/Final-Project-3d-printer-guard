@@ -23,13 +23,13 @@ cap = None
 # Global variables for telemetry
 current_fps = 0.0
 current_inference_time = 0.0
+current_alert_threshold = 0.85 # default
 
 # The address of the FastAPI server
 API_ENDPOINT = "http://127.0.0.1:8000/internal/detection"
-SESSION_ID = 1 # We will temporarily use a permanent session, until we dynamically pull the active session.
 
+# Helper function to pull the last active session
 def get_active_session_id():
-    # פונקציית עזר למשיכת הסשן הפעיל האחרון
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT session_id FROM sessions ORDER BY session_id DESC LIMIT 1")
@@ -86,8 +86,9 @@ def generate_video_frames():
                     defect_type = label
                     
             # --- Alerting Engine Phase ---
+            # Uses the dynamic security threshold that the user defined in the settings screen
             # Overflow prevention mechanism: sends an alert only once every 10 seconds even if there is a sequence of detections
-            if highest_conf > 0.85 and (time.time() - last_alert_time > 10):
+            if highest_conf > current_alert_threshold and (time.time() - last_alert_time > 10):
                 last_alert_time = time.time()
                 # Pulling the active session securely directly from the database
                 active_session = get_active_session_id()

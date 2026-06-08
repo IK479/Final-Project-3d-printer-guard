@@ -166,6 +166,7 @@ __pycache__/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+body.json
 
 # Pyre type checker
 .pyre/

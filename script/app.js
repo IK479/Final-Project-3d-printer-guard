@@ -37,32 +37,58 @@ if (slider && sliderVal) {
 const saveBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('SAVE CONFIGURATION'));
 const toast = document.getElementById('save-toast');
 
-if (saveBtn && toast) {
-  saveBtn.addEventListener('click', () => {
-    toast.classList.remove('translate-y-24', 'opacity-0');
-    toast.classList.add('translate-y-0', 'opacity-100');
+if (saveBtn && toast && slider) {
+  saveBtn.addEventListener('click', async () => {
+    // Convert percentages to decimals
+    const thresholdDecimal = parseInt(slider.value) / 100.0;
     
-    setTimeout(() => {
-      toast.classList.add('translate-y-24', 'opacity-0');
-      toast.classList.remove('translate-y-0', 'opacity-100');
-    }, 3000);
+   try {
+        const response = await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ confidence_threshold: thresholdDecimal })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Popping up the green success window
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+            
+            // Update the system log on the dashboard page
+            if (typeof addSystemLog === 'function') {
+                addSystemLog(`Confidence threshold updated to ${slider.value}%`, "SYS");
+            }
+        }
+    } catch (error) {
+        console.error("Error saving settings:", error);
+        alert("⚠️ Failed to sync configuration with the server.");
+    }
   });
 }
 
 // 3. Hover effect on settings areas
-const sections = document.querySelectorAll('section');
-if (sections.length > 0) {
-  sections.forEach(section => {
-    section.addEventListener('mouseenter', () => {
-      const container = section.querySelector('.bg-surface-container');
-      if(container) container.classList.add('border-primary/50');
-    });
-    section.addEventListener('mouseleave', () => {
-      const container = section.querySelector('.bg-surface-container');
-      if(container) container.classList.remove('border-primary/50');
-    });
-  });
+async function syncSettingsOnLoad() {
+    if (slider && sliderVal) {
+        try {
+            const response = await fetch('/api/settings');
+            const data = await response.json();
+            if (data.confidence_threshold) {
+                const percent = Math.round(data.confidence_threshold * 100);
+                slider.value = percent;
+                // Enables the visual update of the number on the screen
+                slider.dispatchEvent(new Event('input')); 
+            }
+        } catch(e) {}
+    }
 }
+document.addEventListener('DOMContentLoaded', syncSettingsOnLoad);
 
 /* =========================================
       Alerts & Print History

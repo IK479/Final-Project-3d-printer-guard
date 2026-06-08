@@ -9,7 +9,6 @@ from contextlib import asynccontextmanager
 from fastapi import BackgroundTasks
 import sqlite3
 import inference
-import notification_service
 import asyncio
 import io
 import csv
@@ -85,6 +84,8 @@ class DetectionResult(BaseModel):
     confidence: float
     timestamp: datetime
 
+class SystemSettings(BaseModel):
+    confidence_threshold: float
 
 @app.get("/video_feed")
 async def video_feed():
@@ -173,11 +174,21 @@ async def stop_session():
     current_session_id = None
     return {"status": "success", "message": "Monitoring session stopped"}
 
+@app.post("/api/settings")
+async def update_settings(settings: SystemSettings):
+    # Updating the live variable in inference.py
+    inference.current_alert_threshold = settings.confidence_threshold
+    return {"status": "success", "message": "Threshold updated successfully"}
+
+@app.get("/api/settings")
+async def get_settings():
+    return {"confidence_threshold": inference.current_alert_threshold}
+
 @app.post("/internal/detection")
 async def receive_detection(result: DetectionResult, background_tasks: BackgroundTasks):
     print(f"Received analysis for session {result.session_id}: {result.defect_type} ({result.confidence*100}%)")
 
-    CONFIDENCE_THRESHOLD = 0.85
+    CONFIDENCE_THRESHOLD = inference.current_alert_threshold
     alert_created = result.confidence > CONFIDENCE_THRESHOLD and (result.defect_type.lower() != "normal")
 
     conn = get_db_connection()
