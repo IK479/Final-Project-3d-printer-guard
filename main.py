@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles  
 from fastapi.responses import FileResponse, StreamingResponse
@@ -15,6 +15,7 @@ import csv
 from dotenv import load_dotenv
 import tkinter as tk
 from tkinter import filedialog
+from auth_service import router as auth_router, get_current_user
 
 from database import get_db_connection
 from notification_service import send_telegram_alert, telegram_bot_listener, execute_emergency_stop
@@ -73,6 +74,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
+
 # --- Schemas ---
 class SessionStartRequest(BaseModel):
     printer_name: Optional[str] = "Unit 01-Alpha"
@@ -109,6 +112,11 @@ async def read_config():
 async def read_history():
     return FileResponse("script/Alerts & History.html")
 
+# Path to login screen
+@app.get("/login")
+async def read_login():
+    return FileResponse("script/Login.html")
+
 # =================================================================
 #  WebSocket layer (streaming real-time notifications)
 # =================================================================
@@ -140,7 +148,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 @app.post("/printer/emergency-stop")
-async def api_emergency_stop():
+async def api_emergency_stop(user: dict = Depends(get_current_user)):
     success, message = execute_emergency_stop()
     if success:
         send_telegram_alert("EMERGENCY STOP INITIATED FROM DASHBOARD", 1.0)
@@ -175,7 +183,7 @@ async def stop_session():
     return {"status": "success", "message": "Monitoring session stopped"}
 
 @app.post("/api/settings")
-async def update_settings(settings: SystemSettings):
+async def update_settings(settings: SystemSettings, user: dict = Depends(get_current_user)):
     # Updating the live variable in inference.py
     inference.current_alert_threshold = settings.confidence_threshold
     return {"status": "success", "message": "Threshold updated successfully"}

@@ -1,19 +1,30 @@
 import sqlite3
+from passlib.context import CryptContext
 
-# ניצור את הקובץ ישירות בתיקיית הפרויקט
+# Password encryption
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# create the file directly in the project folder.
 conn = sqlite3.connect("print_guard.db")
 cursor = conn.cursor()
 
-# הפעלת מפתחות זרים
+# Enabling foreign keys
 conn.execute("PRAGMA foreign_keys = ON;")
 
-# מחיקת טבלאות ישנות אם קיימות
+# Delete old tables if they exist
 cursor.executescript("""
 DROP TABLE IF EXISTS "alerts";
 DROP TABLE IF EXISTS "detections";
 DROP TABLE IF EXISTS "sessions";
 
--- 1. יצירת טבלת סשנים
+-- 1. Create the system user table                     
+CREATE TABLE "users" (
+    "user_id"       INTEGER PRIMARY KEY AUTOINCREMENT,
+    "username"      TEXT UNIQUE NOT NULL,
+    "password_hash" TEXT NOT NULL,
+    "role"          TEXT DEFAULT 'operator'
+);
+                                          
+-- 2. Create a session table
 CREATE TABLE "sessions" (
     "session_id"    INTEGER PRIMARY KEY AUTOINCREMENT,
     "start_time"    TEXT,
@@ -21,7 +32,7 @@ CREATE TABLE "sessions" (
     "filament_type" TEXT
 );
 
--- 2. יצירת טבלת זיהויים
+-- 3. Creating a detection table
 CREATE TABLE "detections" (
     "detection_id"  INTEGER PRIMARY KEY AUTOINCREMENT,
     "session_id"    INTEGER,
@@ -31,7 +42,7 @@ CREATE TABLE "detections" (
     FOREIGN KEY("session_id") REFERENCES "sessions" ("session_id")
 );
 
--- 3. יצירת טבלת התראות
+-- 4. Create an alert table
 CREATE TABLE "alerts" (
     "alert_id"      INTEGER PRIMARY KEY AUTOINCREMENT,
     "detection_id"  INTEGER,
@@ -40,6 +51,14 @@ CREATE TABLE "alerts" (
 );
 """)
 
+# Create the first dynamic administrator (Admin) user for the system
+default_username = "admin"
+default_password = "admin123"
+hashed_password = pwd_context.hash(default_password)
+
+cursor.execute('''
+               INSERT INTO users (username, password_hash, role)
+               VALUES (?,?,?)''',(default_username, hashed_password,"administrator"))
 conn.commit()
 conn.close()
 print("Database 'print_guard.db' initialized successfully!")

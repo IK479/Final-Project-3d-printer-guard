@@ -1,4 +1,31 @@
 /* =========================================
+   Aegis Client-Side Security Guard
+   ========================================= */
+const token = localStorage.getItem('aegis_token');
+
+// 1. הגנה על הדפים: אם אין טוקן והמשתמש לא במסך הלוגין, נזרוק אותו להתחבר
+if (!token && !window.location.pathname.includes('/login')) {
+    window.location.href = '/login';
+}
+
+// 2. פונקציית עזר לביצוע בקשות API מאובטחות (שמוסיפה את ה-Header המאובטח)
+async function fetchWithAuth(url, options = {}) {
+    const token = localStorage.getItem('aegis_token');
+    options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+    };
+    
+    const response = await fetch(url, options);
+    if (response.status === 401) {
+        // If the token is expired or invalid, we will clear it and return to the login screen.
+        localStorage.removeItem('aegis_token');
+        window.location.href = '/login';
+    }
+    return response;
+}
+
+/* =========================================
   Common code for all screens
    ========================================= */
 // Click effect (micro-interaction) on each button in the system
@@ -43,7 +70,7 @@ if (saveBtn && toast && slider) {
     const thresholdDecimal = parseInt(slider.value) / 100.0;
     
    try {
-        const response = await fetch('/api/settings', {
+        const response = await fetchWithAuth('/api/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ confidence_threshold: thresholdDecimal })
@@ -77,7 +104,7 @@ if (saveBtn && toast && slider) {
 async function syncSettingsOnLoad() {
     if (slider && sliderVal) {
         try {
-            const response = await fetch('/api/settings');
+            const response = await fetchWithAuth('/api/settings');
             const data = await response.json();
             if (data.confidence_threshold) {
                 const percent = Math.round(data.confidence_threshold * 100);
@@ -140,7 +167,7 @@ emergencyBtns.forEach(btn => {
             if (confirmStop) {
                 try {
                     // Calling our FastAPI server
-                    const response = await fetch('/printer/emergency-stop', { method: 'POST' });
+                    const response = await fetchWithAuth('/printer/emergency-stop', { method: 'POST' });
                     const result = await response.json();
                     
                     if (result.status === 'success') {
@@ -170,7 +197,7 @@ if (startStreamBtn) {
     startStreamBtn.addEventListener('click', async () => {
         try {
             // 1. Opening a new print session in the database
-            const response = await fetch('/session/start', {
+            const response = await fetchWithAuth('/session/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ printer_name: "Unit 01-Alpha", filament_type: "PLA" })
@@ -199,7 +226,7 @@ if (stopCaptureBtn) {
     stopCaptureBtn.addEventListener('click', async () => {
         try {
             // 1. Calling the API to end the session (updates the Backend)
-            await fetch('/session/stop', { method: 'POST' });
+            await fetchWithAuth('/session/stop', { method: 'POST' });
             
             // 2. Secure stopping and disconnecting of the current at the interface
             if (liveFeedImg) {
@@ -450,7 +477,7 @@ async function loadInitialDashboardData() {
     addSystemLog("Dashboard connected securely", "OK");
 
     try {
-        const response = await fetch('/api/recent-alerts');
+        const response = await fetchWithAuth('/api/recent-alerts');
         const data = await response.json();
         
         if (data.status === 'success') {
@@ -468,3 +495,27 @@ async function loadInitialDashboardData() {
 
 // Running the function on page load
 document.addEventListener('DOMContentLoaded', loadInitialDashboardData);
+
+/* =========================================
+   Authentication & Identity
+   ========================================= */
+// Finding all profile buttons in the system
+const profileBtns = document.querySelectorAll('button span[data-icon="account_circle"]');
+
+profileBtns.forEach(icon => {
+    const btn = icon.parentElement;
+    
+    // Toggle the Secure Logout button action
+    btn.onclick = (e) => {
+        e.preventDefault();
+        
+        if (confirm('🔒 Are you sure you want to securely log out?')) {
+            // Deleting identification data from the browser
+            localStorage.removeItem('aegis_token');
+            localStorage.removeItem('aegis_user');
+            
+            // Throwing the user back to the entry page
+            window.location.href = '/login';
+        }
+    };
+});
