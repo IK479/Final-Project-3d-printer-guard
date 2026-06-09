@@ -117,6 +117,11 @@ async def read_history():
 async def read_login():
     return FileResponse("script/Login.html")
 
+# Path to register screen
+@app.get("/register")
+async def read_register():
+    return FileResponse("script/Register.html")
+
 # =================================================================
 #  WebSocket layer (streaming real-time notifications)
 # =================================================================

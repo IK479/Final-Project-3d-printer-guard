@@ -20,8 +20,7 @@ DROP TABLE IF EXISTS "sessions";
 CREATE TABLE "users" (
     "user_id"       INTEGER PRIMARY KEY AUTOINCREMENT,
     "username"      TEXT UNIQUE NOT NULL,
-    "password_hash" TEXT NOT NULL,
-    "role"          TEXT DEFAULT 'operator'
+    "password_hash" TEXT NOT NULL
 );
                                           
 -- 2. Create a session table
@@ -57,8 +56,8 @@ default_password = "admin123"
 hashed_password = pwd_context.hash(default_password)
 
 cursor.execute('''
-               INSERT INTO users (username, password_hash, role)
-               VALUES (?,?,?)''',(default_username, hashed_password,"administrator"))
+               INSERT INTO users (username, password_hash)
+               VALUES (?,?)''',(default_username, hashed_password))
 conn.commit()
 conn.close()
 print("Database 'print_guard.db' initialized successfully!")

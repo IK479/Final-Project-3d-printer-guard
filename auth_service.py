@@ -23,6 +23,10 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security_scheme)):
     token = credentials.credentials
     try:
@@ -39,7 +43,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 async def login(request: LoginRequest):
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT password_hash, role FROM users WHERE username = ?", (request.username,))
+        cursor.execute("SELECT password_hash FROM users WHERE username = ?", (request.username,))
         row = cursor.fetchone()
         
     if not row or not pwd_context.verify(request.password, row[0]):
@@ -47,9 +51,34 @@ async def login(request: LoginRequest):
         
     token_payload = {
         "sub": request.username,
-        "role": row[1],
         "exp": time.time() + 86400
     }
     token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     
-    return {"status": "success", "token": token, "role": row[1]}
+    return {"status": "success", "token": token}
+
+# Registration path
+@router.post("/register")
+async def register(request: RegisterRequest):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        
+        # 1. Make sure the username is not already taken.
+        cursor.execute("SELECT username FROM users WHERE username = ?", (request.username,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Username already exists")
+        
+        # 2. Encrypt the password
+        hashed_password = pwd_context.hash(request.password)
+        
+        # 3. Save the new user in the database
+        try:
+            cursor.execute('''
+                INSERT INTO users (username, password_hash)
+                VALUES (?, ?)
+            ''', (request.username, hashed_password))
+            conn.commit()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+            
+    return {"status": "success", "message": "User registered successfully"}
