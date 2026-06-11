@@ -56,7 +56,6 @@
             msgEl.classList.add('hidden');
 
             const username = document.getElementById('username').value;
-            const role = document.getElementById('role').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
@@ -74,7 +73,6 @@
                     body: JSON.stringify({
                         username: username,
                         password: password,
-                        role: role
                     })
                 });
 

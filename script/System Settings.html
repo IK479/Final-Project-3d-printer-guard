@@ -182,23 +182,6 @@
 <span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none" data-icon="expand_more">expand_more</span>
 </div>
 </div>
-<div class="space-y-2">
-<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Frame Rate Limit</label>
-<div class="flex gap-2">
-<button class="flex-1 bg-surface-container-high border border-primary text-primary py-2 font-mono-label text-mono-label rounded">30 FPS</button>
-<button class="flex-1 bg-surface-container-high border border-outline-variant text-on-surface-variant py-2 font-mono-label text-mono-label rounded hover:border-surface-tint">60 FPS</button>
-<button class="flex-1 bg-surface-container-high border border-outline-variant text-on-surface-variant py-2 font-mono-label text-mono-label rounded hover:border-surface-tint">90 FPS</button>
-</div>
-</div>
-<div class="flex items-center justify-between p-4 bg-surface-container-low rounded border border-outline-variant">
-<div>
-<p class="font-body-sm text-body-sm font-semibold">HW Acceleration</p>
-<p class="text-[10px] text-on-surface-variant">Using NVIDIA TensorRT</p>
-</div>
-<div class="w-12 h-6 bg-primary-container rounded-full relative cursor-pointer">
-<div class="absolute right-1 top-1 w-4 h-4 bg-on-primary-container rounded-full"></div>
-</div>
-</div>
 </div>
 </section>
 <!-- MODEL SECTION -->
@@ -232,7 +215,6 @@
 <p class="text-[10px] text-on-surface-variant">Extrusion failure monitoring</p>
 </div>
 </div>
-<input checked="" class="w-5 h-5 rounded border-outline-variant bg-surface-container text-primary focus:ring-primary" type="checkbox"/>
 </div>
 <div class="flex items-center justify-between group cursor-pointer">
 <div class="flex items-center gap-3">
@@ -244,7 +226,6 @@
 <p class="text-[10px] text-on-surface-variant">Fine filament artifacts</p>
 </div>
 </div>
-<input checked="" class="w-5 h-5 rounded border-outline-variant bg-surface-container text-primary focus:ring-primary" type="checkbox"/>
 </div>
 </div> </div> </div> </section>
 <!-- STORAGE SECTION -->
@@ -268,17 +249,24 @@
 <p class="text-[10px] text-right text-on-surface-variant uppercase">325 GB Used / 175 GB Free</p>
 </div>
 <div class="space-y-2">
-<label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Purge Policy</label>
-<div class="space-y-2">
-<label class="flex items-center gap-3 p-3 rounded bg-surface-container-low border border-outline-variant cursor-pointer hover:border-primary transition-colors">
-<input checked="" class="text-primary focus:ring-primary bg-surface-container border-outline-variant" name="purge" type="radio"/>
-<span class="font-body-sm text-body-sm">Delete files older than 30 days</span>
-</label>
-<label class="flex items-center gap-3 p-3 rounded bg-surface-container-low border border-outline-variant cursor-pointer hover:border-primary transition-colors">
-<input class="text-primary focus:ring-primary bg-surface-container border-outline-variant" name="purge" type="radio"/>
-<span class="font-body-sm text-body-sm">Overwrite oldest on Full</span>
-</label>
-</div>
+    <label class="font-mono-label text-mono-label text-on-surface-variant uppercase">
+        Purge Policy
+    </label>
+
+    <div class="p-4 rounded bg-surface-container-low border border-outline-variant">
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div>
+                    <p class="font-body-sm text-body-sm font-semibold">
+                        Delete files older than 30 days
+                    </p>
+                    <p class="text-[10px] text-on-surface-variant uppercase">
+                        Dashboard retention policy
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </div>
 </section>
@@ -306,5 +294,4 @@
 </div>
 </div>
 <script src="app.js"></script>
-    </script>
 </body></html>
