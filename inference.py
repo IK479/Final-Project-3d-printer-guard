@@ -1,6 +1,7 @@
 import cv2
 import time
 import requests
+import base64
 from datetime import datetime
 from ultralytics import YOLO
 
@@ -62,13 +63,13 @@ def generate_video_frames():
             # 1. Hard resolution change to 640x640
             frame_resized = cv2.resize(frame, (640, 640))
             # 2. Convert color channels from OpenCV's BGR format to RGB format for the model
-            frame_rgb = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)
+       #     frame_rgb = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)
 
             # --- Inference phase vs. YOLO model ---
             if model is not None:
                 inf_start = time.time() # Start loop time measurement (FPS)
                 #Transfer the frame to the model adapted to the three classes (Normal, Spaghetti, Stringing)
-                results = model(frame_rgb, verbose=False)
+                results = model(frame_resized, verbose=False)
 
                 # Calculate the time taken by the model (in milliseconds)
                 current_inference_time = (time.time() - inf_start) * 1000
@@ -94,11 +95,15 @@ def generate_video_frames():
                     last_alert_time = time.time()
                     # Pulling the active session securely directly from the database
                     active_session = get_active_session_id()
+                    # screenshot and converting it to Base64
+                    _, buffer = cv2.imencode('.jpg', annotated_frame)
+                    image_b64 = base64.b64encode(buffer).decode('utf-8')
                     payload = {
                         "session_id": active_session,
                         "defect_type": defect_type,
                         "confidence": highest_conf,
-                        "timestamp": datetime.now().isoformat()
+                        "timestamp": datetime.now().isoformat(),
+                        "image_base64": image_b64
                     }
                 
                     try:

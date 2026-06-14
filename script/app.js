@@ -3,12 +3,12 @@
    ========================================= */
 const token = localStorage.getItem('aegis_token');
 
-// 1. הגנה על הדפים: אם אין טוקן והמשתמש לא במסך הלוגין, נזרוק אותו להתחבר
+// 1. If there is no token and the user is not on the login screen, we will throw it to connect
 if (!token && !window.location.pathname.includes('/login')) {
     window.location.href = '/login';
 }
 
-// 2. פונקציית עזר לביצוע בקשות API מאובטחות (שמוסיפה את ה-Header המאובטח)
+// 2. Helper function for making API requests
 async function fetchWithAuth(url, options = {}) {
     const token = localStorage.getItem('aegis_token');
     options.headers = {
@@ -322,7 +322,7 @@ function handleTelemetry(data){
             
             // Latency is simulated as minor network variations
             osdElements[1].innerText = `LATENCY: ${Math.floor(Math.random() * 5 + 10)}ms`; 
-            
+      
             // Real-time system clock update (YYYY-MM-DD HH:MM:SS)
             const now = new Date();
             osdElements[2].innerText = now.getFullYear() + "-" + 
@@ -381,7 +381,6 @@ function addDynamicAlert(defectType, confidence) {
 
     // Add the new alert to the top of the list
     alertsFeed.prepend(alertDiv);
-    
     // Keeping a maximum of 50 notifications to avoid clogging up the browser
     if (alertsFeed.children.length > 50) {
         alertsFeed.removeChild(alertsFeed.lastChild);
@@ -412,32 +411,45 @@ function addSystemLog(message, status = 'OK') {
    Video Player Interactions (Zoom, Grid, Snapshot)
    ========================================= */
 let currentZoom = 1;
-const zoomInBtn = document.getElementById('zoom-in-btn');
-const zoomOutBtn = document.getElementById('zoom-out-btn');
+const zoomInBtn = document.querySelector('#zoom-in-btn, #zoom_in-btn');
+const zoomOutBtn = document.querySelector('#zoom-out-btn, #zoom_out-btn');
 const snapshotBtn = document.getElementById('snapshot-btn');
 const toggleGridBtn = document.getElementById('toggle-grid-btn');
-const videoContainer = liveFeedImg ? liveFeedImg.parentElement : null;
+const liveFeed = document.getElementById('live-feed-img');
+const videoContainer = liveFeed ? liveFeed.parentElement : null;
+
+if (liveFeed) {
+    liveFeed.style.transformOrigin = 'center center';
+}
 
 // Zoom In
-if (zoomInBtn && liveFeedImg) {
+if (zoomInBtn && liveFeed) {
     zoomInBtn.addEventListener('click', () => {
-        if (currentZoom < 3) currentZoom += 0.2;
-        liveFeedImg.style.transform = `scale(${currentZoom})`;
-        liveFeedImg.style.transition = 'transform 0.3s ease';
+        if (currentZoom < 3){
+            currentZoom += 0.2;
+            liveFeed.style.transform = `scale(${currentZoom})`;
+            liveFeed.style.transition = 'transform 0.3s ease cubic-bezier(0.4, 0, 0.2, 1)';
+            if (typeof addSystemLog === 'function') addSystemLog(`Camera zoomed in to ${Math.round(currentZoom * 100)}%`, 'SYS');
+        }
     });
 }
 
 // Zoom Out
-if (zoomOutBtn && liveFeedImg) {
+if (zoomOutBtn && liveFeed) {
     zoomOutBtn.addEventListener('click', () => {
-        if (currentZoom > 1) currentZoom -= 0.2;
-        liveFeedImg.style.transform = `scale(${currentZoom})`;
+        if (currentZoom > 1){
+            currentZoom -= 0.2;
+        }else {
+            currentZoom = 1;
+        }
+        liveFeed.style.transform = `scale(${currentZoom})`;
+        if (typeof addSystemLog === 'function') addSystemLog(`Camera zoomed out to ${Math.round(currentZoom * 100)}%`, 'SYS');
     });
 }
 
 // Snapshot with Flash effect
-if (snapshotBtn) {
-    snapshotBtn.addEventListener('click', () => {
+if (snapshotBtn && liveFeed) {
+    snapshotBtn.addEventListener('click', async () => {
         if (videoContainer) {
             // Create a white flash element
             const flash = document.createElement('div');
@@ -449,8 +461,61 @@ if (snapshotBtn) {
             setTimeout(() => flash.classList.add('opacity-0'), 100);
             setTimeout(() => flash.remove(), 400);
         }
-        // Log it to the system
-        addSystemLog('Snapshot saved successfully', 'OK');
+        // Capturing the image from the video and downloading it
+        try {
+            // Checks if the stream is working
+            if (!liveFeed.src || liveFeed.src.endsWith('/')) {
+                if (typeof addSystemLog === 'function') addSystemLog('Cannot take snapshot: No active video feed', 'ERROR');
+                return;
+            }
+
+            // Creating a virtual canvas to convert the img tag to a file
+            const canvas = document.createElement('canvas');
+            canvas.width = liveFeed.naturalWidth || 640;
+            canvas.height = liveFeed.naturalHeight || 480;
+            const ctx = canvas.getContext('2d');
+            // Drawing the current frame
+            ctx.drawImage(liveFeed, 0, 0, canvas.width, canvas.height);
+            // Convert the image to text format (Base64) without HTML prefix
+            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+            const base64Image = dataURL.split(',')[1];
+
+            // Creating a hidden link for active download
+            const link = document.createElement('a');
+            // Create a filename that contains the current date and time
+            const timeStamp = new Date().toISOString().replace(/[:.]/g, '-');
+            link.download = `PrintGuard_Snapshot_${timeStamp}.jpg`;
+link.href = dataURL;
+            link.click(); 
+
+            if (typeof addSystemLog === 'function') addSystemLog('Snapshot saved locally', 'OK');
+
+            // Sending the data to the server to be recorded in the DB
+            const payload = {
+                session_id: 1, 
+                defect_type: "Manual Snapshot", 
+                confidence: 1.0, // 100% confidence
+                timestamp: new Date().toISOString(),
+                image_base64: base64Image
+            };
+
+            const response = await fetch('/internal/detection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                if (typeof addSystemLog === 'function') addSystemLog('Snapshot uploaded to History DB', 'OK');
+                alert('📸 Snapshot saved securely to Print History!'); 
+            } else {
+                if (typeof addSystemLog === 'function') addSystemLog('Failed to sync snapshot to DB', 'ERROR');
+            }
+
+        } catch (err) {
+            console.error("Snapshot error:", err);
+            if (typeof addSystemLog === 'function') addSystemLog('Failed to save snapshot', 'ERROR');
+        }
     });
 }
 
@@ -519,3 +584,70 @@ profileBtns.forEach(icon => {
         }
     };
 });
+
+/* =========================================
+   History Table Rendering
+   ========================================= */
+async function loadHistoryTable() {
+    const tableBody = document.getElementById('history-table-body');
+    if (!tableBody) return; // Runs only if we are in the history screen
+
+    try {
+        const response = await fetchWithAuth('/api/history-data');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            tableBody.innerHTML = ''; 
+            
+            if(data.events.length === 0) {
+                 tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-on-surface-variant font-mono-label">No alerts recorded yet.</td></tr>';
+                 return;
+            }
+
+            data.events.forEach(event => {
+                const confPercent = (event.confidence * 100).toFixed(1);
+                const isCritical = event.confidence > 0.90;
+                
+                const severityText = isCritical ? `CRITICAL: ${event.defect_type}` : `WARNING: ${event.defect_type}`;
+                const badgeBg = isCritical ? 'bg-error-container text-on-error-container' : 'bg-secondary-container text-on-secondary-container';
+                const barColor = isCritical ? 'bg-error' : 'bg-secondary';
+                const textColor = isCritical ? 'text-error' : 'text-secondary';
+                
+                // Event time formatting 
+                const formattedTime = event.timestamp.replace('T', ' ').split('.')[0];
+
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-outline-variant hover:bg-surface-variant/30 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-4 font-mono-label">${formattedTime}</td>
+                    <td class="p-4">
+                        <div class="w-16 h-10 bg-surface-dim border border-outline-variant rounded overflow-hidden">
+                            <img alt="Defect Snapshot" class="w-full h-full object-cover" src="${event.snapshot_url}"/>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <span class="${badgeBg} px-2 py-0.5 rounded-full font-status-badge text-status-badge">${severityText}</span>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-24 h-1 bg-surface-dim rounded-full overflow-hidden">
+                                <div class="h-full ${barColor}" style="width: ${confPercent}%"></div>
+                            </div>
+                            <span class="font-mono-label ${textColor}">${confPercent}%</span>
+                        </div>
+                    </td>
+                    <td class="p-4 font-mono-label">${event.layer_id}</td>
+                    <td class="p-4 text-center">
+                        <a href="${event.snapshot_url}" target="_blank" class="text-primary hover:underline font-bold">View Image</a>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+    } catch (error) {
+        console.error("Failed to load history data:", error);
+    }
+}
+
+    // Calling a function on page load
+document.addEventListener('DOMContentLoaded', loadHistoryTable);

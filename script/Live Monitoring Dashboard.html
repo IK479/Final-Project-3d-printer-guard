@@ -110,10 +110,15 @@
       border-width: 2px;
       position: absolute;
     }
-    .grid-bg {
-      background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 20px 20px;
+    .grid-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0; /* Stretches the mesh across the entire frame */
+      background-image: linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+      background-size: 40px 40px; 
+      pointer-events: none; /* Allows mouse clicks to "pass through" the grid to the zoom */
+      z-index: 10;
     }
   </style>
 </head>
@@ -124,9 +129,6 @@
 <span class="font-headline-md text-headline-md text-primary font-bold">Aegis Print Guard</span>
 <div class="h-6 w-px bg-outline-variant"></div>
 <div class="flex items-center gap-3">
-<div class="flex items-center gap-2 px-3 py-1 bg-primary-container/10 border border-primary/20 rounded">
-<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-<span class="font-mono-label text-mono-label text-primary">Monitoring Active</span>
 </div>
 </div>
 </div>
@@ -182,7 +184,7 @@
 <!-- Main Canvas Content -->
 <main class="ml-64 mt-16 h-[calc(100vh-64px)] grid grid-cols-[1fr_360px] bg-background">
 <!-- Central Feed Canvas -->
-<section class="relative p-6 flex flex-col gap-4 overflow-hidden grid-bg">
+<section class="relative p-6 flex flex-col gap-4 overflow-hidden">
 <div class="flex items-center justify-between">
 <div class="flex items-center gap-2">
 <span class="material-symbols-outlined text-primary" data-icon="videocam">videocam</span>
@@ -197,7 +199,7 @@
 <span class="material-symbols-outlined" data-icon="zoom_out">zoom_out</span>
 </button>
 </div>
-<button class="flex items-center gap-2 px-4 py-1 border border-outline-variant hover:bg-surface-variant rounded font-mono-label text-mono-label transition-colors">
+<button id="snapshot-btn" class="flex items-center gap-2 px-4 py-1 border border-outline-variant hover:bg-surface-variant rounded font-mono-label text-mono-label transition-colors">
 <span class="material-symbols-outlined text-sm" data-icon="photo_camera">photo_camera</span>
             SNAPSHOT
           </button>

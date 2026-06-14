@@ -12,6 +12,8 @@ import inference
 import asyncio
 import io
 import csv
+import base64
+import os
 from dotenv import load_dotenv
 import tkinter as tk
 from tkinter import filedialog
@@ -86,6 +88,7 @@ class DetectionResult(BaseModel):
     defect_type: str
     confidence: float
     timestamp: datetime
+    image_base64: Optional[str] = None
 
 class SystemSettings(BaseModel):
     confidence_threshold: float
@@ -221,12 +224,23 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
             
             # 2. Alert handling (only if security is high enough)
             if alert_created:
-                image_path = f"images/alerts/session_{result.session_id}_{last_detection_id}.jpg"
+                # Create a path to save the image
+                os.makedirs("images/alerts", exist_ok=True) # Verify that the folder exists
+                image_filename = f"session_{result.session_id}_{last_detection_id}.jpg"
+                image_path = f"images/alerts/{image_filename}"
+                db_image_path = f"/images/alerts/{image_filename}"
                 
+                if result.image_base64:
+                    try:
+                        img_data = base64.b64decode(result.image_base64)
+                        with open(image_path, "wb") as f:
+                            f.write(img_data)
+                    except Exception as e:
+                        print(f"Error saving image: {e}")
                 cursor.execute('''
                     INSERT INTO alerts (detection_id, image_path)
                     VALUES (?, ?)
-                ''', (last_detection_id, image_path))
+                ''', (last_detection_id, db_image_path))
                 
                 # Transferring the report to Telegram to a background task so as not to jam the server
                 background_tasks.add_task(send_telegram_alert, result.defect_type, result.confidence)
@@ -294,6 +308,35 @@ async def export_alerts_csv():
 
     output.seek(0)
     return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=PrintGuard_Alerts_History.csv"})
+
+@app.get("/api/history-data")
+async def get_history_data():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Retrieving faults along with their images from the alerts table
+        cursor.execute('''
+            SELECT d.timestamp, a.image_path, d.defect_type, d.confidence, d.detection_id
+            FROM detections d
+            JOIN alerts a ON d.detection_id = a.detection_id
+            ORDER BY d.timestamp DESC
+            LIMIT 50
+        ''')
+        rows = cursor.fetchall()
+        
+        events = []
+        for row in rows:
+            events.append({
+                "timestamp": row[0],
+                "snapshot_url": row[1] if row[1] else "",
+                "defect_type": row[2],
+                "confidence": row[3],
+                "layer_id": f"#{row[4]}"
+            })
+        return {"status": "success", "events": events}
+
+# # Exposing the image folder to the browser
+os.makedirs("images/alerts", exist_ok=True)
+app.mount("/images", StaticFiles(directory="images"), name="images")
 
 # =================================================================
 #  Serving static files (CSS, JS) - must remain at the end of the file!
