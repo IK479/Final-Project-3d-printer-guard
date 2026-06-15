@@ -188,7 +188,14 @@ async def stop_session():
     global is_monitoring, current_session_id
     is_monitoring = False
     current_session_id = None
+    inference.release_camera()
     return {"status": "success", "message": "Monitoring session stopped"}
+
+@app.get("/api/session/status")
+async def get_session_status():
+    # Returns to the browser whether the camera is currently running in the background
+    global is_monitoring, current_session_id
+    return {"is_monitoring": is_monitoring, "session_id": current_session_id}
 
 @app.post("/api/settings")
 async def update_settings(settings: SystemSettings, user: dict = Depends(get_current_user)):
@@ -290,25 +297,6 @@ async def get_recent_alerts():
             })
         return {"status": "success", "alerts": alerts}
     
-@app.get("/api/export-csv")
-async def export_alerts_csv():
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute('''SELECT d.timestamp, s.printer_name, d.defect_type, d.confidence FROM detections d LEFT JOIN sessions s ON d.session_id = s.id ORDER BY d.timestamp DESC''')
-        rows = cursor.fetchall()
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['PrintGuard System Export - Academic Year 2025-2026 (תשפ"ו)'])
-    writer.writerow([]) 
-    writer.writerow(['Timestamp', 'Printer Name', 'Defect Type', 'Confidence Score'])
-    
-    for row in rows:
-        writer.writerow([row[0], row[1], row[2], f"{row[3]*100:.1f}%" if row[3] else "N/A"])
-
-    output.seek(0)
-    return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=PrintGuard_Alerts_History.csv"})
-
 @app.get("/api/history-data")
 async def get_history_data():
     with get_db_connection() as conn:

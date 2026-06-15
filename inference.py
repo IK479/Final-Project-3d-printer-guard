@@ -52,23 +52,31 @@ def generate_video_frames():
     cap.set(cv2.CAP_PROP_FPS, 15)
     print("Hardware camera streaming started...")
 
-    try:
-        while True:
-            loop_start = time.time()
-            success, frame = cap.read()
-            if not success:
-                print("Warning: Dropped frame from hardware.")
-                break
+    while True:
+        if cap is None or not cap.isOpened():
+            break
+        loop_start = time.time()
+        success, frame = cap.read()
+        if not success:
+            print("Warning: Dropped frame from hardware.")
+            break
 
-            # 1. Hard resolution change to 640x640
-            frame_resized = cv2.resize(frame, (640, 640))
-            # 2. Convert color channels from OpenCV's BGR format to RGB format for the model
-       #     frame_rgb = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)
+        frame_resized = cv2.resize(frame, (640, 640))
+        # Darkness Detection
+        gray_frame = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2GRAY)
+        mean_brightness = cv2.mean(gray_frame)[0]
 
+        if mean_brightness < 15:
+            # The camera is covered or there is complete darkness.
+            annotated_frame = frame_resized.copy()
+            cv2.putText(annotated_frame, "WARNING: CAMERA COVERED / NO SIGNAL", 
+                        (40, 320), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 3, cv2.LINE_AA)
+            current_inference_time = 0.0   
+        else:     
             # --- Inference phase vs. YOLO model ---
             if model is not None:
                 inf_start = time.time() # Start loop time measurement (FPS)
-                #Transfer the frame to the model adapted to the three classes (Normal, Spaghetti, Stringing)
+                # Transfer the frame to the model adapted to the three classes (Normal, Spaghetti, Stringing)
                 results = model(frame_resized, verbose=False)
 
                 # Calculate the time taken by the model (in milliseconds)
@@ -90,7 +98,6 @@ def generate_video_frames():
                     
                 # --- Alerting Engine Phase ---
                 # Uses the dynamic security threshold that the user defined in the settings screen
-                # Overflow prevention mechanism: sends an alert only once every 10 seconds even if there is a sequence of detections
                 if highest_conf > current_alert_threshold and (time.time() - last_alert_time > 10):
                     last_alert_time = time.time()
                     # Pulling the active session securely directly from the database
@@ -113,16 +120,19 @@ def generate_video_frames():
             else:
                 annotated_frame = frame_resized
 
-            time_diff = time.time() - loop_start
-            if time_diff > 0:
-                current_fps = 1.0 / time_diff
-            # Encoding the processed frame to JPEG for streaming in the Web interface
-            ret, buffer = cv2.imencode('.jpg', annotated_frame)
-            if ret:
-                yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-    finally:
-        print("[Hardware] Streaming client disconnected. Releasing camera.")
-        if cap is not None:
-            cap.release()
-            cap = None
+        time_diff = time.time() - loop_start
+        if time_diff > 0:
+            current_fps = 1.0 / time_diff
+        
+        # Encoding the processed frame to JPEG for streaming in the Web interface
+        ret, buffer = cv2.imencode('.jpg', annotated_frame)
+        if ret:
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+
+def release_camera():
+    global cap
+    if cap is not None:
+        cap.release()
+        cap = None
+        print("[Hardware] Camera hardware released safely.")

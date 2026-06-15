@@ -334,7 +334,11 @@ function handleTelemetry(data){
         }
 }
 
-function addDynamicAlert(defectType, confidence) {
+function addDynamicAlert(defectType, confidence, providedTime) {
+    if (defectType && defectType.toLowerCase() === 'normal') {
+        return;
+    }
+    
     const alertsFeed = document.getElementById('alerts-feed');
     if (!alertsFeed) return;
 
@@ -542,12 +546,25 @@ async function loadInitialDashboardData() {
     addSystemLog("Dashboard connected securely", "OK");
 
     try {
+        const statusRes = await fetchWithAuth('/api/session/status');
+        const statusData = await statusRes.json();
+        const liveFeedImg = document.getElementById('live-feed-img');
+        
+        if (statusData.is_monitoring && liveFeedImg) {
+            liveFeedImg.src = '/video_feed'; // Reconnecting to the active stream
+            liveFeedImg.src = '/video_feed?t=' + new Date().getTime();
+            addSystemLog("Resumed active monitoring stream", "SYS");
+        }
+    } catch (error) {
+       console.error("Failed to check session status:", error);
+    }
+
+    try {
         const response = await fetchWithAuth('/api/recent-alerts');
         const data = await response.json();
         
         if (data.status === 'success') {
-            alertsFeed.innerHTML = ''; //Cleaning the feed
-            // Flip the array so that the newest is on top.
+            alertsFeed.innerHTML = ''; 
             [...data.alerts].reverse().forEach(alert => {
                 addDynamicAlert(alert.defect_type, alert.confidence, alert.timestamp);
             });
@@ -558,8 +575,8 @@ async function loadInitialDashboardData() {
     }
 }
 
-// Running the function on page load
-document.addEventListener('DOMContentLoaded', loadInitialDashboardData);
+// Running the function immediately
+loadInitialDashboardData();
 
 /* =========================================
    Authentication & Identity
@@ -586,8 +603,12 @@ profileBtns.forEach(icon => {
 });
 
 /* =========================================
-   History Table Rendering
+   History Table Rendering & Filtering With CSV Export
    ========================================= */
+let allHistoryEvents = []; // A repository of all events that came from the server
+let currentFilteredEvents = []; // A temporary repository of events that passed the current filter
+
+// Pulling data from the server once per load
 async function loadHistoryTable() {
     const tableBody = document.getElementById('history-table-body');
     if (!tableBody) return; // Runs only if we are in the history screen
@@ -597,57 +618,170 @@ async function loadHistoryTable() {
         const data = await response.json();
         
         if (data.status === 'success') {
-            tableBody.innerHTML = ''; 
-            
-            if(data.events.length === 0) {
-                 tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-on-surface-variant font-mono-label">No alerts recorded yet.</td></tr>';
-                 return;
-            }
-
-            data.events.forEach(event => {
-                const confPercent = (event.confidence * 100).toFixed(1);
-                const isCritical = event.confidence > 0.90;
-                
-                const severityText = isCritical ? `CRITICAL: ${event.defect_type}` : `WARNING: ${event.defect_type}`;
-                const badgeBg = isCritical ? 'bg-error-container text-on-error-container' : 'bg-secondary-container text-on-secondary-container';
-                const barColor = isCritical ? 'bg-error' : 'bg-secondary';
-                const textColor = isCritical ? 'text-error' : 'text-secondary';
-                
-                // Event time formatting 
-                const formattedTime = event.timestamp.replace('T', ' ').split('.')[0];
-
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-outline-variant hover:bg-surface-variant/30 transition-colors';
-                tr.innerHTML = `
-                    <td class="p-4 font-mono-label">${formattedTime}</td>
-                    <td class="p-4">
-                        <div class="w-16 h-10 bg-surface-dim border border-outline-variant rounded overflow-hidden">
-                            <img alt="Defect Snapshot" class="w-full h-full object-cover" src="${event.snapshot_url}"/>
-                        </div>
-                    </td>
-                    <td class="p-4">
-                        <span class="${badgeBg} px-2 py-0.5 rounded-full font-status-badge text-status-badge">${severityText}</span>
-                    </td>
-                    <td class="p-4">
-                        <div class="flex items-center gap-2">
-                            <div class="w-24 h-1 bg-surface-dim rounded-full overflow-hidden">
-                                <div class="h-full ${barColor}" style="width: ${confPercent}%"></div>
-                            </div>
-                            <span class="font-mono-label ${textColor}">${confPercent}%</span>
-                        </div>
-                    </td>
-                    <td class="p-4 font-mono-label">${event.layer_id}</td>
-                    <td class="p-4 text-center">
-                        <a href="${event.snapshot_url}" target="_blank" class="text-primary hover:underline font-bold">View Image</a>
-                    </td>
-                `;
-                tableBody.appendChild(tr);
-            });
+            allHistoryEvents = data.events; // Save the data in the local database
+            currentFilteredEvents = data.events; // By default, everything is displayed at the beginning
+            renderHistoryTable(currentFilteredEvents);  // Draw everything for the first time
         }
-    } catch (error) {
+            } catch (error) {
         console.error("Failed to load history data:", error);
+        }
     }
+
+    // Table drawing function (receives an array of events and draws them)
+    function renderHistoryTable(eventsToRender) {
+    const tableBody = document.getElementById('history-table-body');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    // Update the event summary row dynamically
+    const paginationText = document.getElementById('pagination-text');
+    if (paginationText) {
+        const totalEvents = allHistoryEvents.length; // Total events in the database
+        const renderedCount = eventsToRender.length; // The number of events that passed the current filter.
+        
+        if (renderedCount === 0) {
+            paginationText.textContent = `Showing 0 of ${totalEvents} events`;
+        } else {
+            paginationText.textContent = `Showing 1-${renderedCount} of ${totalEvents} events`;
+        }
+    }
+
+    if(eventsToRender.length === 0) {
+         tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-on-surface-variant font-mono-label">No matching events found.</td></tr>';
+         return;
+    }
+
+    eventsToRender.forEach(event => {
+        const confPercent = (event.confidence * 100).toFixed(1);
+        const isCritical = event.confidence > 0.90;
+        
+        const severityText = isCritical ? `CRITICAL: ${event.defect_type}` : `WARNING: ${event.defect_type}`;
+        const badgeBg = isCritical ? 'bg-error-container text-on-error-container' : 'bg-secondary-container text-on-secondary-container';
+        const barColor = isCritical ? 'bg-error' : 'bg-secondary';
+        const textColor = isCritical ? 'text-error' : 'text-secondary';
+        
+        const formattedTime = event.timestamp.replace('T', ' ').split('.')[0];
+
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-outline-variant hover:bg-surface-variant/30 transition-colors';
+        tr.innerHTML = `
+            <td class="p-4 font-mono-label">${formattedTime}</td>
+            <td class="p-4">
+                <div class="w-16 h-10 bg-surface-dim border border-outline-variant rounded overflow-hidden">
+                    <img alt="Defect Snapshot" class="w-full h-full object-cover" src="${event.snapshot_url}"/>
+                </div>
+            </td>
+            <td class="p-4">
+                <span class="${badgeBg} px-2 py-0.5 rounded-full font-status-badge text-status-badge">${severityText}</span>
+            </td>
+            <td class="p-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-24 h-1 bg-surface-dim rounded-full overflow-hidden">
+                        <div class="h-full ${barColor}" style="width: ${confPercent}%"></div>
+                    </div>
+                    <span class="font-mono-label ${textColor}">${confPercent}%</span>
+                </div>
+            </td>
+            <td class="p-4 font-mono-label">${event.layer_id || '-'}</td>
+            <td class="p-4 text-center">
+                <a href="${event.snapshot_url}" target="_blank" class="text-primary hover:underline font-bold">View Image</a>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
 }
 
-    // Calling a function on page load
-document.addEventListener('DOMContentLoaded', loadHistoryTable);
+// The filter function that is activated every time something is changed
+function applyFilters() {
+    // 1. Reading the current values ​​from all fields
+    const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+    const defectFilter = document.getElementById('filter-defect')?.value || 'all';
+    const confFilter = document.getElementById('filter-confidence')?.value || 'all';
+    const timeFilter = document.getElementById('filter-time')?.value || 'all';
+
+    // 2. Filtering the global array by conditions
+    currentFilteredEvents = allHistoryEvents.filter(event => {
+        // Free text search test
+        const matchesSearch = (event.layer_id && event.layer_id.toLowerCase().includes(searchTerm)) ||
+                              (event.defect_type && event.defect_type.toLowerCase().includes(searchTerm));
+
+        // Checking the type of fault
+        const matchesDefect = defectFilter === 'all' || event.defect_type.toLowerCase().includes(defectFilter);
+
+        // Security level check
+        const confPercent = event.confidence * 100;
+        let matchesConf = true;
+        if (confFilter !== 'all') {
+            matchesConf = confPercent >= parseInt(confFilter);
+        }
+
+        // Time range check
+        let matchesTime = true;
+        if (timeFilter !== 'all') {
+            const eventDate = new Date(event.timestamp);
+            const now = new Date();
+            const diffHours = (now - eventDate) / (1000 * 60 * 60); // Calculating the difference in hours
+            
+            if (timeFilter === '24h') matchesTime = diffHours <= 24;
+            if (timeFilter === '7d') matchesTime = diffHours <= (24 * 7);
+        }
+
+        // Returns true only if the event meets all conditions.
+        return matchesSearch && matchesDefect && matchesConf && matchesTime;
+    });
+
+    // 3. Redraw the table with the filtered data
+    renderHistoryTable(currentFilteredEvents);
+}
+
+// === Export only the filtered data to CSV ===
+function exportFilteredCSV() {
+    if (!currentFilteredEvents || currentFilteredEvents.length === 0) {
+        alert("No matching records found to export.");
+        return;
+    }
+
+    // Adding UTF-8 BOM markup so that Excel displays Hebrew correctly
+    let csvContent = "\uFEFF"; 
+    csvContent += 'PrintGuard System Export\n\n';
+    csvContent += 'Timestamp,Printer Name,Defect Type,Confidence Score,Layer ID\n';
+
+    currentFilteredEvents.forEach(event => {
+        const timestamp = event.timestamp ? event.timestamp.replace('T', ' ').split('.')[0] : "Unknown Time";
+        const printerName = "Unit 01-Alpha"; //The dynamic printer name associated with the context
+        const defectType = event.defect_type ? event.defect_type : "Unknown Defect";
+        const confidence = event.confidence !== null ? `${(event.confidence * 100).toFixed(1)}%` : "N/A";
+        const layerId = event.layer_id ? event.layer_id : "-";
+
+        // Wrapping in quotation marks to prevent line breaks due to commas in the text
+        csvContent += `"${timestamp}","${printerName}","${defectType}","${confidence}","${layerId}"\n`;
+    });
+
+    // Create a virtual file and download it automatically
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const timeStamp = new Date().toISOString().slice(0, 10);
+    
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `PrintGuard_Filtered_History_${timeStamp}.csv`);
+    document.body.appendChild(link);
+    
+    link.click(); // Performing a virtual click to download
+    document.body.removeChild(link);
+}
+
+// Initializing the screen
+document.addEventListener('DOMContentLoaded', () => {
+    loadHistoryTable();
+
+    // Attaching listeners to filter fields
+    const searchInput = document.getElementById('search-input');
+    const filterDefect = document.getElementById('filter-defect');
+    const filterConf = document.getElementById('filter-confidence');
+    const filterTime = document.getElementById('filter-time');
+
+    if(searchInput) searchInput.addEventListener('input', applyFilters); // Works on every letter typed
+    if(filterDefect) filterDefect.addEventListener('change', applyFilters); // Active in selection
+    if(filterConf) filterConf.addEventListener('change', applyFilters);
+    if(filterTime) filterTime.addEventListener('change', applyFilters);
+    });
