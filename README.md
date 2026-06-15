@@ -259,7 +259,7 @@ Older records are automatically purged during scheduled cleanup cycles.
 
 ## 👥 Project Development Group
 
-**Emily Myaskovsksi** B.Sc. Computer Science Academic Project Academic Year: **2025–2026**
+**Emily Myaskovsksi** B.Sc. Computer Science Academic Project Academic Year: **2025–2026**<br>
 **Ido Katz** B.Sc. Computer Science Academic Project Academic Year: **2025–2026**
 
 ---
