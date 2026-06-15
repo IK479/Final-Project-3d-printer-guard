@@ -1,6 +1,7 @@
 # AI Models and heavy files
 models/
 test_image.webp
+images/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
