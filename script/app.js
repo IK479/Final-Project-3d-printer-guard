@@ -1,27 +1,11 @@
 /* =========================================
-   Aegis Client-Side Security Guard
+   Aegis Client-Side Security Guard - BYPASSED
    ========================================= */
-const token = localStorage.getItem('aegis_token');
 
-// 1. If there is no token and the user is not on the login screen, we will throw it to connect
-if (!token && !window.location.pathname.includes('/login')) {
-    window.location.href = '/login';
-}
-
-// 2. Helper function for making API requests
+// 1. Helper function for making API requests without authentication headers
 async function fetchWithAuth(url, options = {}) {
-    const token = localStorage.getItem('aegis_token');
-    options.headers = {
-        ...options.headers,
-        'Authorization': `Bearer ${token}`
-    };
-    
+    // Authentication token check is bypassed for local environment development
     const response = await fetch(url, options);
-    if (response.status === 401) {
-        // If the token is expired or invalid, we will clear it and return to the login screen.
-        localStorage.removeItem('aegis_token');
-        window.location.href = '/login';
-    }
     return response;
 }
 
@@ -489,7 +473,7 @@ if (snapshotBtn && liveFeed) {
             // Create a filename that contains the current date and time
             const timeStamp = new Date().toISOString().replace(/[:.]/g, '-');
             link.download = `PrintGuard_Snapshot_${timeStamp}.jpg`;
-link.href = dataURL;
+            link.href = dataURL;
             link.click(); 
 
             if (typeof addSystemLog === 'function') addSystemLog('Snapshot saved locally', 'OK');
@@ -579,30 +563,6 @@ async function loadInitialDashboardData() {
 loadInitialDashboardData();
 
 /* =========================================
-   Authentication & Identity
-   ========================================= */
-// Finding all profile buttons in the system
-const profileBtns = document.querySelectorAll('button span[data-icon="account_circle"]');
-
-profileBtns.forEach(icon => {
-    const btn = icon.parentElement;
-    
-    // Toggle the Secure Logout button action
-    btn.onclick = (e) => {
-        e.preventDefault();
-        
-        if (confirm('🔒 Are you sure you want to securely log out?')) {
-            // Deleting identification data from the browser
-            localStorage.removeItem('aegis_token');
-            localStorage.removeItem('aegis_user');
-            
-            // Throwing the user back to the entry page
-            window.location.href = '/login';
-        }
-    };
-});
-
-/* =========================================
    History Table Rendering & Filtering With CSV Export
    ========================================= */
 let allHistoryEvents = []; // A repository of all events that came from the server
@@ -622,13 +582,13 @@ async function loadHistoryTable() {
             currentFilteredEvents = data.events; // By default, everything is displayed at the beginning
             renderHistoryTable(currentFilteredEvents);  // Draw everything for the first time
         }
-            } catch (error) {
+    } catch (error) {
         console.error("Failed to load history data:", error);
-        }
     }
+}
 
-    // Table drawing function (receives an array of events and draws them)
-    function renderHistoryTable(eventsToRender) {
+// Table drawing function (receives an array of events and draws them)
+function renderHistoryTable(eventsToRender) {
     const tableBody = document.getElementById('history-table-body');
     if (!tableBody) return;
     
@@ -693,44 +653,36 @@ async function loadHistoryTable() {
 
 // The filter function that is activated every time something is changed
 function applyFilters() {
-    // 1. Reading the current values ​​from all fields
     const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
     const defectFilter = document.getElementById('filter-defect')?.value || 'all';
     const confFilter = document.getElementById('filter-confidence')?.value || 'all';
     const timeFilter = document.getElementById('filter-time')?.value || 'all';
 
-    // 2. Filtering the global array by conditions
     currentFilteredEvents = allHistoryEvents.filter(event => {
-        // Free text search test
         const matchesSearch = (event.layer_id && event.layer_id.toLowerCase().includes(searchTerm)) ||
                               (event.defect_type && event.defect_type.toLowerCase().includes(searchTerm));
 
-        // Checking the type of fault
         const matchesDefect = defectFilter === 'all' || event.defect_type.toLowerCase().includes(defectFilter);
 
-        // Security level check
         const confPercent = event.confidence * 100;
         let matchesConf = true;
         if (confFilter !== 'all') {
             matchesConf = confPercent >= parseInt(confFilter);
         }
 
-        // Time range check
         let matchesTime = true;
         if (timeFilter !== 'all') {
             const eventDate = new Date(event.timestamp);
             const now = new Date();
-            const diffHours = (now - eventDate) / (1000 * 60 * 60); // Calculating the difference in hours
+            const diffHours = (now - eventDate) / (1000 * 60 * 60); 
             
             if (timeFilter === '24h') matchesTime = diffHours <= 24;
             if (timeFilter === '7d') matchesTime = diffHours <= (24 * 7);
         }
 
-        // Returns true only if the event meets all conditions.
         return matchesSearch && matchesDefect && matchesConf && matchesTime;
     });
 
-    // 3. Redraw the table with the filtered data
     renderHistoryTable(currentFilteredEvents);
 }
 
@@ -741,23 +693,20 @@ function exportFilteredCSV() {
         return;
     }
 
-    // Adding UTF-8 BOM markup so that Excel displays Hebrew correctly
     let csvContent = "\uFEFF"; 
     csvContent += 'PrintGuard System Export\n\n';
     csvContent += 'Timestamp,Printer Name,Defect Type,Confidence Score,Layer ID\n';
 
     currentFilteredEvents.forEach(event => {
         const timestamp = event.timestamp ? event.timestamp.replace('T', ' ').split('.')[0] : "Unknown Time";
-        const printerName = "Unit 01-Alpha"; //The dynamic printer name associated with the context
+        const printerName = "Unit 01-Alpha"; 
         const defectType = event.defect_type ? event.defect_type : "Unknown Defect";
         const confidence = event.confidence !== null ? `${(event.confidence * 100).toFixed(1)}%` : "N/A";
         const layerId = event.layer_id ? event.layer_id : "-";
 
-        // Wrapping in quotation marks to prevent line breaks due to commas in the text
         csvContent += `"${timestamp}","${printerName}","${defectType}","${confidence}","${layerId}"\n`;
     });
 
-    // Create a virtual file and download it automatically
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const timeStamp = new Date().toISOString().slice(0, 10);
@@ -766,7 +715,7 @@ function exportFilteredCSV() {
     link.setAttribute("download", `PrintGuard_Filtered_History_${timeStamp}.csv`);
     document.body.appendChild(link);
     
-    link.click(); // Performing a virtual click to download
+    link.click(); 
     document.body.removeChild(link);
 }
 
@@ -774,14 +723,13 @@ function exportFilteredCSV() {
 document.addEventListener('DOMContentLoaded', () => {
     loadHistoryTable();
 
-    // Attaching listeners to filter fields
     const searchInput = document.getElementById('search-input');
     const filterDefect = document.getElementById('filter-defect');
     const filterConf = document.getElementById('filter-confidence');
     const filterTime = document.getElementById('filter-time');
 
-    if(searchInput) searchInput.addEventListener('input', applyFilters); // Works on every letter typed
-    if(filterDefect) filterDefect.addEventListener('change', applyFilters); // Active in selection
+    if(searchInput) searchInput.addEventListener('input', applyFilters); 
+    if(filterDefect) filterDefect.addEventListener('change', applyFilters); 
     if(filterConf) filterConf.addEventListener('change', applyFilters);
     if(filterTime) filterTime.addEventListener('change', applyFilters);
-    });
+});

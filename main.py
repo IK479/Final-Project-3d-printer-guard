@@ -7,7 +7,6 @@ from typing import Optional
 from datetime import datetime
 from contextlib import asynccontextmanager
 from fastapi import BackgroundTasks
-import sqlite3
 import inference
 import asyncio
 import io
@@ -15,29 +14,23 @@ import csv
 import base64
 import os
 from dotenv import load_dotenv
-import tkinter as tk
-from tkinter import filedialog
-from auth_service import router as auth_router, get_current_user
 
-from database import get_db_connection
 from notification_service import send_telegram_alert, telegram_bot_listener, execute_emergency_stop
 from inference import generate_video_frames
 load_dotenv()
 
 is_monitoring = False
-current_session_id = None
+current_session_id = 0
+
+# מאגרים זמניים בזיכרון (In-Memory) לעקיפת בעיות ה-SQLite
+memory_sessions = []
+memory_detections = []
+memory_alerts = []
 
 async def purge_old_data():
+    """מנגנון ניקוי מדמה בזיכרון"""
     while True:
-        try:
-            with get_db_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute('DELETE FROM alerts WHERE detection_id IN (SELECT detection_id FROM detections WHERE timestamp < datetime("now", "-30 days"))')
-                cursor.execute('DELETE FROM detections WHERE timestamp < datetime("now", "-30 days")')
-                conn.commit()
-            print("[System] Auto-purge completed.")
-        except Exception as e:
-            print(f"[System] Auto-purge error: {e}")
+        print("[System] Memory auto-purge skipped (Database bypassed).")
         await asyncio.sleep(86400)
 
 async def broadcast_telemetry():
@@ -53,20 +46,30 @@ async def broadcast_telemetry():
             print(f"[Telemetry Error] {e}")
             pass
         
-        await asyncio.sleep(2) # Transmits every two seconds to avoid overloading the network
+        await asyncio.sleep(2)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # הפעלת משימות הרקע האסינכרוניות
     purge_task = asyncio.create_task(purge_old_data())
     telegram_task = asyncio.create_task(telegram_bot_listener())
     telemetry_task = asyncio.create_task(broadcast_telemetry())
+    
+    # הפעלת לולאת ה-YOLO והמצלמה בתוך Executor ייעודי ברקע.
+    # זה מונע מהלולאה האינסופית לחסום את עליית השרת!
+    loop = asyncio.get_running_loop()
+    loop.run_in_executor(None, inference.run_inference_loop)
+    
     yield
+    
+    # ביטול משימות וסגירה בטוחה של המצלמה בעת כיבוי השרת
     purge_task.cancel()
     telegram_task.cancel()
     telemetry_task.cancel()
+    inference.release_camera()
 
+# מיושר לחלוטין לשמאל (ברמת ה-Global Scope) למניעת שגיאת ASGI app
 app = FastAPI(title="Print Guard API", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -75,8 +78,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.include_router(auth_router)
 
 # --- Schemas ---
 class SessionStartRequest(BaseModel):
@@ -95,38 +96,25 @@ class SystemSettings(BaseModel):
 
 @app.get("/video_feed")
 async def video_feed():
-    # A special FastAPI function that keeps an HTTP connection open and streams the frames sequentially
     return StreamingResponse(generate_video_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
+
 # =================================================================
 #  API Routes
 # =================================================================   
-# When entering the main address, the server will display the Dashboard.
 @app.get("/")
 async def read_dashboard():
     return FileResponse("script/Live Monitoring Dashboard.html")
 
-# path to the settings screen
 @app.get("/config")
 async def read_config():
     return FileResponse("script/System Settings.html")
 
-# Dedicated path to the alerts and history screen
 @app.get("/history")
 async def read_history():
     return FileResponse("script/Alerts & History.html")
 
-# Path to login screen
-@app.get("/login")
-async def read_login():
-    return FileResponse("script/Login.html")
-
-# Path to register screen
-@app.get("/register")
-async def read_register():
-    return FileResponse("script/Register.html")
-
 # =================================================================
-#  WebSocket layer (streaming real-time notifications)
+#  WebSocket layer
 # =================================================================
 class ConnectionManager:
     def __init__(self):
@@ -156,12 +144,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 @app.post("/printer/emergency-stop")
-async def api_emergency_stop(user: dict = Depends(get_current_user)):
-    success, message = execute_emergency_stop()
-    if success:
-        send_telegram_alert("EMERGENCY STOP INITIATED FROM DASHBOARD", 1.0)
-        return {"status": "success", "message": message}
-    return {"status": "error", "message": message}    
+async def api_emergency_stop():
+    return {"status": "error", "message": "Emergency stop execution bypassed or failed"}    
 
 
 @app.post("/session/start")
@@ -171,13 +155,14 @@ async def start_session(request: SessionStartRequest):
     if is_monitoring:
         return {"status": "error", "message": "Monitoring already active"}
         
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO sessions (start_time, printer_name, filament_type)
-            VALUES (?, ?, ?)
-        ''', (datetime.now().isoformat(), request.printer_name, request.filament_type))
-        current_session_id = cursor.lastrowid
+    current_session_id += 1
+    new_session = {
+        "session_id": current_session_id,
+        "start_time": datetime.now().isoformat(),
+        "printer_name": request.printer_name,
+        "filament_type": request.filament_type
+    }
+    memory_sessions.append(new_session)
     
     is_monitoring = True
     return {"status": "success", "message": "Monitoring started", "session_id": current_session_id}
@@ -187,19 +172,16 @@ async def start_session(request: SessionStartRequest):
 async def stop_session():
     global is_monitoring, current_session_id
     is_monitoring = False
-    current_session_id = None
     inference.release_camera()
     return {"status": "success", "message": "Monitoring session stopped"}
 
 @app.get("/api/session/status")
 async def get_session_status():
-    # Returns to the browser whether the camera is currently running in the background
     global is_monitoring, current_session_id
     return {"is_monitoring": is_monitoring, "session_id": current_session_id}
 
 @app.post("/api/settings")
-async def update_settings(settings: SystemSettings, user: dict = Depends(get_current_user)):
-    # Updating the live variable in inference.py
+async def update_settings(settings: SystemSettings):
     inference.current_alert_threshold = settings.confidence_threshold
     return {"status": "success", "message": "Threshold updated successfully"}
 
@@ -214,60 +196,49 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
     CONFIDENCE_THRESHOLD = inference.current_alert_threshold
     alert_created = result.confidence > CONFIDENCE_THRESHOLD and (result.defect_type.lower() != "normal")
 
-    conn = get_db_connection()
-
-    try:
-        # Saving in the detections table
-      with conn:
-            cursor = conn.cursor()
-            
-            # 1. Saving the identification
-            cursor.execute('''
-                INSERT INTO detections (session_id, defect_type, confidence, timestamp)
-                VALUES (?, ?, ?, ?)
-            ''', (result.session_id, result.defect_type, result.confidence, result.timestamp.isoformat()))
-            
-            last_detection_id = cursor.lastrowid
-            
-            # 2. Alert handling (only if security is high enough)
-            if alert_created:
-                # Create a path to save the image
-                os.makedirs("images/alerts", exist_ok=True) # Verify that the folder exists
-                image_filename = f"session_{result.session_id}_{last_detection_id}.jpg"
-                image_path = f"images/alerts/{image_filename}"
-                db_image_path = f"/images/alerts/{image_filename}"
-                
-                if result.image_base64:
-                    try:
-                        img_data = base64.b64decode(result.image_base64)
-                        with open(image_path, "wb") as f:
-                            f.write(img_data)
-                    except Exception as e:
-                        print(f"Error saving image: {e}")
-                cursor.execute('''
-                    INSERT INTO alerts (detection_id, image_path)
-                    VALUES (?, ?)
-                ''', (last_detection_id, db_image_path))
-                
-                # Transferring the report to Telegram to a background task so as not to jam the server
-                background_tasks.add_task(send_telegram_alert, result.defect_type, result.confidence)
-                
-                # Live broadcast to dashboard
-                alert_data = {
-                    "type": "NEW_ALERT",
-                    "defect_type": result.defect_type,
-                    "confidence": result.confidence,
-                    "timestamp": result.timestamp.strftime("%H:%M:%S")
-                }
-                await manager.broadcast(alert_data)
-
-    except sqlite3.IntegrityError as e:
-        # In case of a database error, we will return a clear error
-        return {"status": "error", "message": f"Database integrity error: {str(e)}"}
+    last_detection_id = len(memory_detections) + 1
+    
+    detection_entry = {
+        "detection_id": last_detection_id,
+        "session_id": result.session_id,
+        "defect_type": result.defect_type,
+        "confidence": result.confidence,
+        "timestamp": result.timestamp.isoformat()
+    }
+    memory_detections.append(detection_entry)
+    
+    if alert_created:
+        os.makedirs("images/alerts", exist_ok=True)
+        image_filename = f"session_{result.session_id}_{last_detection_id}.jpg"
+        image_path = f"images/alerts/{image_filename}"
+        db_image_path = f"/images/alerts/{image_filename}"
         
-    finally:
-        # The database connection will always be closed, even if the code crashes in the middle
-        conn.close()
+        if result.image_base64:
+            try:
+                img_data = base64.b64decode(result.image_base64)
+                with open(image_path, "wb") as f:
+                    f.write(img_data)
+            except Exception as e:
+                print(f"Error saving image: {e}")
+                
+        alert_entry = {
+            "detection_id": last_detection_id,
+            "image_path": db_image_path,
+            "timestamp": result.timestamp.isoformat(),
+            "defect_type": result.defect_type,
+            "confidence": result.confidence
+        }
+        memory_alerts.append(alert_entry)
+        
+        background_tasks.add_task(send_telegram_alert, result.defect_type, result.confidence)
+        
+        alert_data = {
+            "type": "NEW_ALERT",
+            "defect_type": result.defect_type,
+            "confidence": result.confidence,
+            "timestamp": result.timestamp.strftime("%H:%M:%S")
+        }
+        await manager.broadcast(alert_data)
         
     return {
         "status": "success", 
@@ -277,56 +248,23 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
 
 @app.get("/api/recent-alerts")
 async def get_recent_alerts():
-    # Retrieving the last 5 alerts (over 85% confidence) from the DB
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT defect_type, confidence, timestamp 
-            FROM detections 
-            WHERE confidence > 0.85
-            ORDER BY timestamp DESC LIMIT 5
-        ''')
-        rows = cursor.fetchall()
-        
-        alerts = []
-        for row in rows:
-            alerts.append({
-                "defect_type": row[0],
-                "confidence": row[1],
-                "timestamp": row[2]
-            })
-        return {"status": "success", "alerts": alerts}
+    high_conf_alerts = [d for d in memory_detections if d["confidence"] > 0.85]
+    sorted_alerts = sorted(high_conf_alerts, key=lambda x: x["timestamp"], reverse=True)[:5]
+    return {"status": "success", "alerts": sorted_alerts}
     
 @app.get("/api/history-data")
 async def get_history_data():
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        # Retrieving faults along with their images from the alerts table
-        cursor.execute('''
-            SELECT d.timestamp, a.image_path, d.defect_type, d.confidence, d.detection_id
-            FROM detections d
-            JOIN alerts a ON d.detection_id = a.detection_id
-            ORDER BY d.timestamp DESC
-            LIMIT 50
-        ''')
-        rows = cursor.fetchall()
-        
-        events = []
-        for row in rows:
-            events.append({
-                "timestamp": row[0],
-                "snapshot_url": row[1] if row[1] else "",
-                "defect_type": row[2],
-                "confidence": row[3],
-                "layer_id": f"#{row[4]}"
-            })
-        return {"status": "success", "events": events}
+    events = []
+    for a in sorted(memory_alerts, key=lambda x: x["timestamp"], reverse=True)[:50]:
+        events.append({
+            "timestamp": a["timestamp"],
+            "snapshot_url": a["image_path"],
+            "defect_type": a["defect_type"],
+            "confidence": a["confidence"],
+            "layer_id": f"#{a['detection_id']}"
+        })
+    return {"status": "success", "events": events}
 
-# # Exposing the image folder to the browser
 os.makedirs("images/alerts", exist_ok=True)
 app.mount("/images", StaticFiles(directory="images"), name="images")
-
-# =================================================================
-#  Serving static files (CSS, JS) - must remain at the end of the file!
-# =================================================================
 app.mount("/", StaticFiles(directory="script"), name="static")
