@@ -303,9 +303,7 @@ function handleTelemetry(data){
         const osdElements = document.querySelectorAll('.backdrop-blur-sm');
         if (osdElements.length >= 3) {
             osdElements[0].innerText = `FPS: ${data.fps}`;
-            
-            // Latency is simulated as minor network variations
-            osdElements[1].innerText = `LATENCY: ${Math.floor(Math.random() * 5 + 10)}ms`; 
+            osdElements[1].innerText = `LATENCY: ${data.inference_time}ms`; 
       
             // Real-time system clock update (YYYY-MM-DD HH:MM:SS)
             const now = new Date();
