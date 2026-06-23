@@ -10,13 +10,9 @@ from fastapi import BackgroundTasks
 import sqlite3
 import inference
 import asyncio
-import io
-import csv
 import base64
 import os
 from dotenv import load_dotenv
-import tkinter as tk
-from tkinter import filedialog
 from auth_service import router as auth_router, get_current_user
 
 from database import get_db_connection
@@ -25,7 +21,7 @@ from inference import generate_video_frames
 load_dotenv()
 
 is_monitoring = False
-current_session_id = None
+current_session_id = 0
 
 async def purge_old_data():
     while True:
@@ -57,13 +53,18 @@ async def broadcast_telemetry():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
     purge_task = asyncio.create_task(purge_old_data())
     telegram_task = asyncio.create_task(telegram_bot_listener())
     telemetry_task = asyncio.create_task(broadcast_telemetry())
+    loop = asyncio.get_running_loop()
+    if hasattr(inference, 'run_inference_loop'):
+        loop.run_in_executor(None, inference.run_inference_loop)
     yield
     purge_task.cancel()
     telegram_task.cancel()
     telemetry_task.cancel()
+    inference.release_camera()
 
 app = FastAPI(title="Print Guard API", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -125,6 +126,19 @@ async def read_login():
 async def read_register():
     return FileResponse("script/Register.html")
 
+# Path to delete data
+@app.delete("/api/history")
+async def clear_history(user: dict = Depends(get_current_user)):
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM alerts")
+            cursor.execute("DELETE FROM detections")
+            conn.commit()
+        return {"status": "success", "message": "History cleared successfully"}
+    except sqlite3.Error as e:
+        return {"status": "error", "message": f"Database error: {str(e)}"}
+
 # =================================================================
 #  WebSocket layer (streaming real-time notifications)
 # =================================================================
@@ -156,7 +170,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 @app.post("/printer/emergency-stop")
-async def api_emergency_stop(user: dict = Depends(get_current_user)):
+async def api_emergency_stop():
     success, message = execute_emergency_stop()
     if success:
         send_telegram_alert("EMERGENCY STOP INITIATED FROM DASHBOARD", 1.0)

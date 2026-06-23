@@ -62,8 +62,8 @@
 
                 if (response.ok && data.token) {
                     // Saving the Token in the browser to switch between pages
-                    localStorage.setItem('aegis_token', data.token);
-                    localStorage.setItem('aegis_user', document.getElementById('username').value);
+                    sessionStorage.setItem('aegis_token', data.token);
+                    sessionStorage.setItem('aegis_user', document.getElementById('username').value);
                     window.location.href = '/'; // Go to the main page
                 } else {
                     errorMsg.innerText = "❌ " + (data.detail || "Authentication Failed");

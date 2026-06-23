@@ -1,7 +1,7 @@
 /* =========================================
    Aegis Client-Side Security Guard
    ========================================= */
-const token = localStorage.getItem('aegis_token');
+const token = sessionStorage.getItem('aegis_token');
 
 // 1. If there is no token and the user is not on the login screen, we will throw it to connect
 if (!token && !window.location.pathname.includes('/login')) {
@@ -10,7 +10,7 @@ if (!token && !window.location.pathname.includes('/login')) {
 
 // 2. Helper function for making API requests
 async function fetchWithAuth(url, options = {}) {
-    const token = localStorage.getItem('aegis_token');
+    const token = sessionStorage.getItem('aegis_token');
     options.headers = {
         ...options.headers,
         'Authorization': `Bearer ${token}`
@@ -19,7 +19,7 @@ async function fetchWithAuth(url, options = {}) {
     const response = await fetch(url, options);
     if (response.status === 401) {
         // If the token is expired or invalid, we will clear it and return to the login screen.
-        localStorage.removeItem('aegis_token');
+        sessionStorage.removeItem('aegis_token');
         window.location.href = '/login';
     }
     return response;
@@ -319,9 +319,7 @@ function handleTelemetry(data){
         const osdElements = document.querySelectorAll('.backdrop-blur-sm');
         if (osdElements.length >= 3) {
             osdElements[0].innerText = `FPS: ${data.fps}`;
-            
-            // Latency is simulated as minor network variations
-            osdElements[1].innerText = `LATENCY: ${Math.floor(Math.random() * 5 + 10)}ms`; 
+            osdElements[1].innerText = `LATENCY: ${data.inference_time}ms`; 
       
             // Real-time system clock update (YYYY-MM-DD HH:MM:SS)
             const now = new Date();
@@ -593,8 +591,8 @@ profileBtns.forEach(icon => {
         
         if (confirm('🔒 Are you sure you want to securely log out?')) {
             // Deleting identification data from the browser
-            localStorage.removeItem('aegis_token');
-            localStorage.removeItem('aegis_user');
+            sessionStorage.removeItem('aegis_token');
+            sessionStorage.removeItem('aegis_user');
             
             // Throwing the user back to the entry page
             window.location.href = '/login';
@@ -785,3 +783,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if(filterConf) filterConf.addEventListener('change', applyFilters);
     if(filterTime) filterTime.addEventListener('change', applyFilters);
     });
+
+// === Clear Alerts & History Logic ===
+const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener('click', async () => {
+        // Request confirmation from the user before deletion
+        const confirmDelete = confirm("⚠️ Are you sure you want to permanently delete all alerts and history? This action cannot be undone.");
+        
+        if (confirmDelete) {
+            try {
+                // Sending a deletion request to the server
+                const response = await fetchWithAuth('/api/history', { method: 'DELETE' });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    alert("✅ All alerts have been successfully cleared.");
+                    // Refresh the table to show it is empty
+                    loadHistoryTable(); 
+                } else {
+                    alert("❌ Error clearing alerts: " + data.message);
+                }
+            } catch (e) {
+                console.error("Failed to clear history:", e);
+                alert("❌ System error while trying to clear alerts.");
+            }
+        }
+    });
+}
