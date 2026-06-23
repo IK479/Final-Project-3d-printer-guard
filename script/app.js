@@ -1,7 +1,21 @@
 /* =========================================
-   Aegis Client-Side Security Guard - BYPASSED
+   Aegis Client-Side Security Guard 
    ========================================= */
 const token = sessionStorage.getItem('aegis_token');
+if (token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp * 1000 < Date.now()) {
+            sessionStorage.removeItem('aegis_token');
+            window.location.href = '/login';
+        }
+    } catch(e) {
+        sessionStorage.removeItem('aegis_token');
+        window.location.href = '/login';
+    }
+} else if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+    window.location.href = '/login';
+}
 
 // 1. Helper function for making API requests without authentication headers
 async function fetchWithAuth(url, options = {}) {
@@ -623,7 +637,7 @@ profileBtns.forEach(icon => {
     btn.onclick = (e) => {
         e.preventDefault();
         
-        if (confirm('🔒 Are you sure you want to securely log out?')) {
+        if (confirm('🔒 Are you sure you want to log out?')) {
             // Deleting identification data from the browser
             sessionStorage.removeItem('aegis_token');
             sessionStorage.removeItem('aegis_user');

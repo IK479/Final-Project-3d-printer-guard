@@ -1,6 +1,7 @@
 import time
 import jwt
 import os
+import secrets
 from passlib.context import CryptContext
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -11,7 +12,7 @@ from dotenv import load_dotenv
 
 # Loading environment variables from file
 load_dotenv()
-JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_SECRET = secrets.token_hex(32)
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])

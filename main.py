@@ -165,7 +165,7 @@ async def api_emergency_stop(user: dict = Depends(get_current_user)):
 
 
 @app.post("/session/start")
-async def start_session(request: SessionStartRequest):
+async def start_session(request: SessionStartRequest, user: dict = Depends(get_current_user)):
     global is_monitoring, current_session_id
 
     if is_monitoring:
@@ -184,7 +184,7 @@ async def start_session(request: SessionStartRequest):
 
 
 @app.post("/session/stop")
-async def stop_session():
+async def stop_session(user: dict = Depends(get_current_user)):
     global is_monitoring, current_session_id
     is_monitoring = False
     current_session_id = None
@@ -192,7 +192,7 @@ async def stop_session():
     return {"status": "success", "message": "Monitoring session stopped"}
 
 @app.get("/api/session/status")
-async def get_session_status():
+async def get_session_status(user: dict = Depends(get_current_user)):
     # Returns to the browser whether the camera is currently running in the background
     global is_monitoring, current_session_id
     return {"is_monitoring": is_monitoring, "session_id": current_session_id}
@@ -282,7 +282,7 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
     }
 
 @app.get("/api/recent-alerts")
-async def get_recent_alerts():
+async def get_recent_alerts(user: dict = Depends(get_current_user)):
     # Retrieving the last 5 alerts (over 85% confidence) from the DB
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -304,7 +304,7 @@ async def get_recent_alerts():
         return {"status": "success", "alerts": alerts}
     
 @app.get("/api/history-data")
-async def get_history_data():
+async def get_history_data(user: dict = Depends(get_current_user)):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         # Retrieving faults along with their images from the alerts table
