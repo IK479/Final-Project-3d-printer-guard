@@ -110,6 +110,45 @@ async function syncSettingsOnLoad() {
         } catch(e) {}
     }
 }
+
+// 4. Reset to Default Logic
+const resetBtn = document.getElementById('reset-default-btn');
+
+if (resetBtn) {
+  resetBtn.addEventListener('click', async () => {
+    if (confirm('⚠️ Are you sure you want to reset to 85% Threshold?')) {
+      try {
+                const response = await fetchWithAuth('/api/settings/reset', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Visual update of the on-screen slider to 85
+                    const slider = document.getElementById('threshold-slider');
+                    if (slider) {
+                        slider.value = 85;
+                        slider.dispatchEvent(new Event('input')); 
+                    }
+                    
+                    // Popping up the green success pane below
+                    const toast = document.getElementById('save-toast');
+                    if (toast) {
+                        toast.classList.remove('translate-y-24', 'opacity-0');
+                        toast.classList.add('translate-y-0', 'opacity-100');
+                        setTimeout(() => {
+                            toast.classList.add('translate-y-24', 'opacity-0');
+                            toast.classList.remove('translate-y-0', 'opacity-100');
+                        }, 3000);
+                    }
+                } else {
+                    alert("⚠️ Error: " + data.message);
+                }
+            } catch (error) {
+                console.error("Reset error:", error);
+                alert("⚠️ Failed to communicate with the server for reset.");
+            }
+        }
+    });
+}
 document.addEventListener('DOMContentLoaded', syncSettingsOnLoad);
 
 /* =========================================

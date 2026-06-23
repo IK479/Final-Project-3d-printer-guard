@@ -207,6 +207,12 @@ async def update_settings(settings: SystemSettings, user: dict = Depends(get_cur
 async def get_settings():
     return {"confidence_threshold": inference.current_alert_threshold}
 
+@app.post("/api/settings/reset")
+async def reset_settings(user: dict = Depends(get_current_user)):
+    # Reset the live variable in the computer vision engine back to 85%
+    inference.current_alert_threshold = 0.85
+    return {"status": "success", "message": "Settings reset to defaults"}
+
 @app.post("/internal/detection")
 async def receive_detection(result: DetectionResult, background_tasks: BackgroundTasks):
     print(f"Received analysis for session {result.session_id}: {result.defect_type} ({result.confidence*100}%)")
