@@ -68,14 +68,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Print Guard API", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 app.include_router(auth_router)
 
 # --- Schemas ---
@@ -97,6 +89,7 @@ class SystemSettings(BaseModel):
 async def video_feed():
     # A special FastAPI function that keeps an HTTP connection open and streams the frames sequentially
     return StreamingResponse(generate_video_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
+
 # =================================================================
 #  API Routes
 # =================================================================   
@@ -193,13 +186,11 @@ async def stop_session(user: dict = Depends(get_current_user)):
 
 @app.get("/api/session/status")
 async def get_session_status(user: dict = Depends(get_current_user)):
-    # Returns to the browser whether the camera is currently running in the background
     global is_monitoring, current_session_id
     return {"is_monitoring": is_monitoring, "session_id": current_session_id}
 
 @app.post("/api/settings")
 async def update_settings(settings: SystemSettings, user: dict = Depends(get_current_user)):
-    # Updating the live variable in inference.py
     inference.current_alert_threshold = settings.confidence_threshold
     return {"status": "success", "message": "Threshold updated successfully"}
 
@@ -207,11 +198,26 @@ async def update_settings(settings: SystemSettings, user: dict = Depends(get_cur
 async def get_settings():
     return {"confidence_threshold": inference.current_alert_threshold}
 
+# 1. FIX: מנגנון ה-Reset המלא התואם ל-app.js
 @app.post("/api/settings/reset")
 async def reset_settings(user: dict = Depends(get_current_user)):
-    # Reset the live variable in the computer vision engine back to 85%
     inference.current_alert_threshold = 0.85
     return {"status": "success", "message": "Settings reset to defaults"}
+
+# 2. FIX: הוספת ראוט ה-DELETE החסר למחיקת היסטוריית התרעות
+@app.delete("/api/history")
+async def clear_all_history(user: dict = Depends(get_current_user)):
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM alerts')
+            cursor.execute('DELETE FROM detections')
+            conn.commit()
+        print("[System] User cleared all alerts and detection history manually.")
+        return {"status": "success", "message": "All alerts and history cleared successfully."}
+    except Exception as e:
+        print(f"[System] Error clearing history: {e}")
+        return {"status": "error", "message": f"Database error: {str(e)}"}
 
 @app.post("/internal/detection")
 async def receive_detection(result: DetectionResult, background_tasks: BackgroundTasks):
@@ -223,11 +229,8 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
     conn = get_db_connection()
 
     try:
-        # Saving in the detections table
-      with conn:
+        with conn:
             cursor = conn.cursor()
-            
-            # 1. Saving the identification
             cursor.execute('''
                 INSERT INTO detections (session_id, defect_type, confidence, timestamp)
                 VALUES (?, ?, ?, ?)
@@ -235,10 +238,8 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
             
             last_detection_id = cursor.lastrowid
             
-            # 2. Alert handling (only if security is high enough)
             if alert_created:
-                # Create a path to save the image
-                os.makedirs("images/alerts", exist_ok=True) # Verify that the folder exists
+                os.makedirs("images/alerts", exist_ok=True)
                 image_filename = f"session_{result.session_id}_{last_detection_id}.jpg"
                 image_path = f"images/alerts/{image_filename}"
                 db_image_path = f"/images/alerts/{image_filename}"
@@ -255,10 +256,8 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
                     VALUES (?, ?)
                 ''', (last_detection_id, db_image_path))
                 
-                # Transferring the report to Telegram to a background task so as not to jam the server
                 background_tasks.add_task(send_telegram_alert, result.defect_type, result.confidence)
                 
-                # Live broadcast to dashboard
                 alert_data = {
                     "type": "NEW_ALERT",
                     "defect_type": result.defect_type,
@@ -268,11 +267,8 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
                 await manager.broadcast(alert_data)
 
     except sqlite3.IntegrityError as e:
-        # In case of a database error, we will return a clear error
         return {"status": "error", "message": f"Database integrity error: {str(e)}"}
-        
     finally:
-        # The database connection will always be closed, even if the code crashes in the middle
         conn.close()
         
     return {
@@ -283,7 +279,6 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
 
 @app.get("/api/recent-alerts")
 async def get_recent_alerts(user: dict = Depends(get_current_user)):
-    # Retrieving the last 5 alerts (over 85% confidence) from the DB
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -307,7 +302,6 @@ async def get_recent_alerts(user: dict = Depends(get_current_user)):
 async def get_history_data(user: dict = Depends(get_current_user)):
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        # Retrieving faults along with their images from the alerts table
         cursor.execute('''
             SELECT d.timestamp, a.image_path, d.defect_type, d.confidence, d.detection_id
             FROM detections d
@@ -328,11 +322,6 @@ async def get_history_data(user: dict = Depends(get_current_user)):
             })
         return {"status": "success", "events": events}
 
-# # Exposing the image folder to the browser
 os.makedirs("images/alerts", exist_ok=True)
 app.mount("/images", StaticFiles(directory="images"), name="images")
-
-# =================================================================
-#  Serving static files (CSS, JS) - must remain at the end of the file!
-# =================================================================
 app.mount("/", StaticFiles(directory="script"), name="static")
