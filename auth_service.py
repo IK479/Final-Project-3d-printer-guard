@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 # Loading environment variables from file
 load_dotenv()
 JWT_SECRET = secrets.token_hex(32)
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 

@@ -26,9 +26,11 @@ CREATE TABLE "users" (
 -- 2. Create a session table
 CREATE TABLE "sessions" (
     "session_id"    INTEGER PRIMARY KEY AUTOINCREMENT,
+    "user_id"       INTEGER,                
     "start_time"    TEXT,
     "printer_name"  TEXT,
-    "filament_type" TEXT
+    "filament_type" TEXT,
+    FOREIGN KEY("user_id") REFERENCES "users" ("user_id")
 );
 
 -- 3. Creating a detection table
@@ -49,15 +51,3 @@ CREATE TABLE "alerts" (
     FOREIGN KEY("detection_id") REFERENCES "detections" ("detection_id")
 );
 """)
-
-# Create the first dynamic administrator (Admin) user for the system
-default_username = "admin"
-default_password = "admin123"
-hashed_password = pwd_context.hash(default_password)
-
-cursor.execute('''
-               INSERT INTO users (username, password_hash)
-               VALUES (?,?)''',(default_username, hashed_password))
-conn.commit()
-conn.close()
-print("Database 'print_guard.db' initialized successfully!")

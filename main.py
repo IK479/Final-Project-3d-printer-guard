@@ -10,13 +10,9 @@ from fastapi import BackgroundTasks
 import sqlite3
 import inference
 import asyncio
-import io
-import csv
 import base64
 import os
 from dotenv import load_dotenv
-import tkinter as tk
-from tkinter import filedialog
 from auth_service import router as auth_router, get_current_user
 
 from database import get_db_connection
@@ -24,6 +20,14 @@ from notification_service import send_telegram_alert, telegram_bot_listener, exe
 from inference import generate_video_frames
 load_dotenv()
 
+def get_user_id(username: str):
+    # Retrieves the user ID from the database based on its name in the token
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id FROM users WHERE username = ?", (username,))
+        row = cursor.fetchone()
+        return row[0] if row else None
+    
 is_monitoring = False
 current_session_id = None
 
@@ -85,14 +89,14 @@ class DetectionResult(BaseModel):
 class SystemSettings(BaseModel):
     confidence_threshold: float
 
+# =================================================================
+#  API Routes
+# ================================================================= 
 @app.get("/video_feed")
 async def video_feed():
     # A special FastAPI function that keeps an HTTP connection open and streams the frames sequentially
     return StreamingResponse(generate_video_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
-
-# =================================================================
-#  API Routes
-# =================================================================   
+  
 # When entering the main address, the server will display the Dashboard.
 @app.get("/")
 async def read_dashboard():
@@ -163,12 +167,13 @@ async def start_session(request: SessionStartRequest, user: dict = Depends(get_c
 
     if is_monitoring:
         return {"status": "error", "message": "Monitoring already active"}
-        
+
+    user_id = get_user_id(user["sub"])   
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO sessions (start_time, printer_name, filament_type)
-            VALUES (?, ?, ?)
+            INSERT INTO sessions (user_id, start_time, printer_name, filament_type)
+            VALUES (?, ?, ?, ?)
         ''', (datetime.now().isoformat(), request.printer_name, request.filament_type))
         current_session_id = cursor.lastrowid
     
@@ -186,11 +191,13 @@ async def stop_session(user: dict = Depends(get_current_user)):
 
 @app.get("/api/session/status")
 async def get_session_status(user: dict = Depends(get_current_user)):
+    # Returns to the browser whether the camera is currently running in the background
     global is_monitoring, current_session_id
     return {"is_monitoring": is_monitoring, "session_id": current_session_id}
 
 @app.post("/api/settings")
 async def update_settings(settings: SystemSettings, user: dict = Depends(get_current_user)):
+    # Updating the live variable in inference.py
     inference.current_alert_threshold = settings.confidence_threshold
     return {"status": "success", "message": "Threshold updated successfully"}
 
@@ -198,21 +205,33 @@ async def update_settings(settings: SystemSettings, user: dict = Depends(get_cur
 async def get_settings():
     return {"confidence_threshold": inference.current_alert_threshold}
 
-# 1. FIX: מנגנון ה-Reset המלא התואם ל-app.js
 @app.post("/api/settings/reset")
 async def reset_settings(user: dict = Depends(get_current_user)):
+    # Reset the live variable in the computer vision engine back to 85%
     inference.current_alert_threshold = 0.85
     return {"status": "success", "message": "Settings reset to defaults"}
 
-# 2. FIX: הוספת ראוט ה-DELETE החסר למחיקת היסטוריית התרעות
 @app.delete("/api/history")
 async def clear_all_history(user: dict = Depends(get_current_user)):
+    user_id = get_user_id(user["sub"])
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('DELETE FROM alerts')
-            cursor.execute('DELETE FROM detections')
-            conn.commit()
+        # Delete notifications and photos that belong only to this user
+        cursor.execute('''
+            DELETE FROM alerts WHERE detection_id IN (
+                SELECT d.detection_id FROM detections d
+                JOIN sessions s ON d.session_id = s.session_id
+                WHERE s.user_id = ?
+            )
+        ''', (user_id,))
+        # Delete IDs belonging to this user
+        cursor.execute('''
+            DELETE FROM detections WHERE session_id IN (
+                SELECT session_id FROM sessions WHERE user_id = ?
+            )
+        ''', (user_id,))
+        conn.commit()
         print("[System] User cleared all alerts and detection history manually.")
         return {"status": "success", "message": "All alerts and history cleared successfully."}
     except Exception as e:
@@ -229,17 +248,20 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
     conn = get_db_connection()
 
     try:
+        # Saving in the detections table
         with conn:
             cursor = conn.cursor()
+            # 1. Saving the identification
             cursor.execute('''
                 INSERT INTO detections (session_id, defect_type, confidence, timestamp)
                 VALUES (?, ?, ?, ?)
             ''', (result.session_id, result.defect_type, result.confidence, result.timestamp.isoformat()))
             
             last_detection_id = cursor.lastrowid
-            
+            # 2. Alert handling (only if security is high enough)
             if alert_created:
-                os.makedirs("images/alerts", exist_ok=True)
+                # Create a path to save the image
+                os.makedirs("images/alerts", exist_ok=True) # Verify that the folder exists
                 image_filename = f"session_{result.session_id}_{last_detection_id}.jpg"
                 image_path = f"images/alerts/{image_filename}"
                 db_image_path = f"/images/alerts/{image_filename}"
@@ -255,9 +277,9 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
                     INSERT INTO alerts (detection_id, image_path)
                     VALUES (?, ?)
                 ''', (last_detection_id, db_image_path))
-                
+                # Transferring the report to Telegram to a background task so as not to jam the server
                 background_tasks.add_task(send_telegram_alert, result.defect_type, result.confidence)
-                
+                # Live broadcast to dashboard
                 alert_data = {
                     "type": "NEW_ALERT",
                     "defect_type": result.defect_type,
@@ -279,14 +301,16 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
 
 @app.get("/api/recent-alerts")
 async def get_recent_alerts(user: dict = Depends(get_current_user)):
+    user_id = get_user_id(user["sub"])
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
             SELECT defect_type, confidence, timestamp 
-            FROM detections 
-            WHERE confidence > 0.85
-            ORDER BY timestamp DESC LIMIT 5
-        ''')
+            FROM detections d
+            JOIN sessions s ON d.session_id = s.session_id
+            WHERE d.confidence > 0.85 AND s.user_id = ?
+            ORDER BY d.timestamp DESC LIMIT 5
+        ''', (user_id,))
         rows = cursor.fetchall()
         
         alerts = []
@@ -300,15 +324,19 @@ async def get_recent_alerts(user: dict = Depends(get_current_user)):
     
 @app.get("/api/history-data")
 async def get_history_data(user: dict = Depends(get_current_user)):
+    user_id = get_user_id(user["sub"])
     with get_db_connection() as conn:
         cursor = conn.cursor()
+        # Retrieving faults along with their images from the alerts table
         cursor.execute('''
             SELECT d.timestamp, a.image_path, d.defect_type, d.confidence, d.detection_id
             FROM detections d
             JOIN alerts a ON d.detection_id = a.detection_id
+            JOIN sessions s ON d.session_id = s.session_id
+            WHERE s.user_id = ?
             ORDER BY d.timestamp DESC
             LIMIT 50
-        ''')
+        ''', (user_id,))
         rows = cursor.fetchall()
         
         events = []
