@@ -48,7 +48,7 @@ To prevent unnecessary CPU load, reduce thermal throttling, and improve runtime 
 Frame acquisition is fixed to:
 
 ```text
-640x480 @ 15 FPS
+640x640 @ 15 FPS
 ```
 
 This resolution is selected to balance real-time inference speed with sufficient visual quality for defect detection.
