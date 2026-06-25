@@ -72,6 +72,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Print Guard API", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth_router)
 
 # --- Schemas ---
@@ -91,12 +99,12 @@ class SystemSettings(BaseModel):
 
 # =================================================================
 #  API Routes
-# ================================================================= 
+# =================================================================
 @app.get("/video_feed")
 async def video_feed():
     # A special FastAPI function that keeps an HTTP connection open and streams the frames sequentially
     return StreamingResponse(generate_video_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
-  
+   
 # When entering the main address, the server will display the Dashboard.
 @app.get("/")
 async def read_dashboard():
@@ -167,14 +175,14 @@ async def start_session(request: SessionStartRequest, user: dict = Depends(get_c
 
     if is_monitoring:
         return {"status": "error", "message": "Monitoring already active"}
-
-    user_id = get_user_id(user["sub"])   
+    
+    user_id = get_user_id(user["sub"])
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO sessions (user_id, start_time, printer_name, filament_type)
             VALUES (?, ?, ?, ?)
-        ''', (datetime.now().isoformat(), request.printer_name, request.filament_type))
+        ''', (user_id, datetime.now().isoformat(), request.printer_name, request.filament_type))
         current_session_id = cursor.lastrowid
     
     is_monitoring = True
@@ -211,33 +219,6 @@ async def reset_settings(user: dict = Depends(get_current_user)):
     inference.current_alert_threshold = 0.85
     return {"status": "success", "message": "Settings reset to defaults"}
 
-@app.delete("/api/history")
-async def clear_all_history(user: dict = Depends(get_current_user)):
-    user_id = get_user_id(user["sub"])
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-        # Delete notifications and photos that belong only to this user
-        cursor.execute('''
-            DELETE FROM alerts WHERE detection_id IN (
-                SELECT d.detection_id FROM detections d
-                JOIN sessions s ON d.session_id = s.session_id
-                WHERE s.user_id = ?
-            )
-        ''', (user_id,))
-        # Delete IDs belonging to this user
-        cursor.execute('''
-            DELETE FROM detections WHERE session_id IN (
-                SELECT session_id FROM sessions WHERE user_id = ?
-            )
-        ''', (user_id,))
-        conn.commit()
-        print("[System] User cleared all alerts and detection history manually.")
-        return {"status": "success", "message": "All alerts and history cleared successfully."}
-    except Exception as e:
-        print(f"[System] Error clearing history: {e}")
-        return {"status": "error", "message": f"Database error: {str(e)}"}
-
 @app.post("/internal/detection")
 async def receive_detection(result: DetectionResult, background_tasks: BackgroundTasks):
     print(f"Received analysis for session {result.session_id}: {result.defect_type} ({result.confidence*100}%)")
@@ -249,8 +230,9 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
 
     try:
         # Saving in the detections table
-        with conn:
+      with conn:
             cursor = conn.cursor()
+            
             # 1. Saving the identification
             cursor.execute('''
                 INSERT INTO detections (session_id, defect_type, confidence, timestamp)
@@ -258,6 +240,7 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
             ''', (result.session_id, result.defect_type, result.confidence, result.timestamp.isoformat()))
             
             last_detection_id = cursor.lastrowid
+            
             # 2. Alert handling (only if security is high enough)
             if alert_created:
                 # Create a path to save the image
@@ -277,8 +260,10 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
                     INSERT INTO alerts (detection_id, image_path)
                     VALUES (?, ?)
                 ''', (last_detection_id, db_image_path))
+                
                 # Transferring the report to Telegram to a background task so as not to jam the server
                 background_tasks.add_task(send_telegram_alert, result.defect_type, result.confidence)
+                
                 # Live broadcast to dashboard
                 alert_data = {
                     "type": "NEW_ALERT",
@@ -289,8 +274,11 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
                 await manager.broadcast(alert_data)
 
     except sqlite3.IntegrityError as e:
+        # In case of a database error, we will return a clear error
         return {"status": "error", "message": f"Database integrity error: {str(e)}"}
+        
     finally:
+        # The database connection will always be closed, even if the code crashes in the middle
         conn.close()
         
     return {
@@ -302,6 +290,7 @@ async def receive_detection(result: DetectionResult, background_tasks: Backgroun
 @app.get("/api/recent-alerts")
 async def get_recent_alerts(user: dict = Depends(get_current_user)):
     user_id = get_user_id(user["sub"])
+    # Retrieving the last 5 alerts (over 85% confidence) from the DB
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -350,6 +339,33 @@ async def get_history_data(user: dict = Depends(get_current_user)):
             })
         return {"status": "success", "events": events}
 
+@app.delete("/api/history")
+async def clear_history(user: dict = Depends(get_current_user)):
+    user_id = get_user_id(user["sub"])
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Delete notifications and photos that belong only to this user
+        cursor.execute('''
+            DELETE FROM alerts WHERE detection_id IN (
+                SELECT d.detection_id FROM detections d
+                JOIN sessions s ON d.session_id = s.session_id
+                WHERE s.user_id = ?
+            )
+        ''', (user_id,))
+        # Delete IDs belonging to this user
+        cursor.execute('''
+            DELETE FROM detections WHERE session_id IN (
+                SELECT session_id FROM sessions WHERE user_id = ?
+            )
+        ''', (user_id,))
+        conn.commit()
+    return {"status": "success", "message": "Personal history cleared."}
+
+# # Exposing the image folder to the browser
 os.makedirs("images/alerts", exist_ok=True)
 app.mount("/images", StaticFiles(directory="images"), name="images")
+
+# =================================================================
+#  Serving static files (CSS, JS) - must remain at the end of the file!
+# =================================================================
 app.mount("/", StaticFiles(directory="script"), name="static")
