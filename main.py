@@ -334,8 +334,7 @@ async def get_history_data(user: dict = Depends(get_current_user)):
                 "timestamp": row[0],
                 "snapshot_url": row[1] if row[1] else "",
                 "defect_type": row[2],
-                "confidence": row[3],
-                "layer_id": f"#{row[4]}"
+                "confidence": row[3]
             })
         return {"status": "success", "events": events}
 

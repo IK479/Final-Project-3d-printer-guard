@@ -339,10 +339,7 @@ function handleNewAlert(data) {
         }
         
         // 3. Update the Recent Alerts counter in the sidebar
-        // Find the tag that says "4 NEW" and change its number and color
-        const alertBadge = Array.from(document.querySelectorAll('span')).find(
-            el => el.textContent.includes('NEW') && el.classList.contains('text-status-badge')
-        );
+        const alertBadge = document.getElementById('alert-counter');
         
         if (alertBadge) {
             const currentCount = parseInt(alertBadge.textContent);
@@ -350,13 +347,13 @@ function handleNewAlert(data) {
                 alertBadge.textContent = `${currentCount + 1} NEW`;
                 
                 // Change the meter color to bright red
-                alertBadge.classList.replace('bg-surface-variant', 'bg-error');
-                alertBadge.classList.replace('text-on-surface-variant', 'text-on-error');
+                alertBadge.classList.remove('bg-surface-variant', 'text-on-surface-variant');
+                alertBadge.classList.add('bg-error', 'text-on-error');
                 
                 // Turns back to gray after 8 seconds
                 setTimeout(() => {
-                    alertBadge.classList.replace('bg-error', 'bg-surface-variant');
-                    alertBadge.classList.replace('text-on-error', 'text-on-surface-variant');
+                    alertBadge.classList.remove('bg-error', 'text-on-error');
+                    alertBadge.classList.add('bg-surface-variant', 'text-on-surface-variant');
                 }, 8000);
             }
         }
@@ -693,7 +690,7 @@ function renderHistoryTable(eventsToRender) {
     }
 
     if(eventsToRender.length === 0) {
-         tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-on-surface-variant font-mono-label">No matching events found.</td></tr>';
+         tableBody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-on-surface-variant font-mono-label">No matching events found.</td></tr>';
          return;
     }
 
@@ -711,25 +708,27 @@ function renderHistoryTable(eventsToRender) {
         const tr = document.createElement('tr');
         tr.className = 'border-b border-outline-variant hover:bg-surface-variant/30 transition-colors';
         tr.innerHTML = `
-            <td class="p-4 font-mono-label">${formattedTime}</td>
+            <td class="p-4 font-mono-label text-center">${formattedTime}</td>
             <td class="p-4">
-                <div class="w-16 h-10 bg-surface-dim border border-outline-variant rounded overflow-hidden">
+            <div class="flex justify-center">
+                <div class="w-16 h-10 bg-surface-dim border border-outline-variant rounded overflow-hidden flex">
                     <img alt="Defect Snapshot" class="w-full h-full object-cover" src="${event.snapshot_url}"/>
                 </div>
             </td>
             <td class="p-4">
+                <div class="flex justify-center">
                 <span class="${badgeBg} px-2 py-0.5 rounded-full font-status-badge text-status-badge">${severityText}</span>
             </td>
             <td class="p-4">
-                <div class="flex items-center gap-2">
+                <div class="flex justify-center items-center gap-2">
                     <div class="w-24 h-1 bg-surface-dim rounded-full overflow-hidden">
                         <div class="h-full ${barColor}" style="width: ${confPercent}%"></div>
                     </div>
                     <span class="font-mono-label ${textColor}">${confPercent}%</span>
                 </div>
             </td>
-            <td class="p-4 font-mono-label">${event.layer_id || '-'}</td>
-            <td class="p-4 text-center">
+            <td class="p-4">
+                <div class="flex justify-center">
                 <a href="${event.snapshot_url}" target="_blank" class="text-primary hover:underline font-bold">View Image</a>
             </td>
         `;
@@ -745,8 +744,7 @@ function applyFilters() {
     const timeFilter = document.getElementById('filter-time')?.value || 'all';
 
     currentFilteredEvents = allHistoryEvents.filter(event => {
-        const matchesSearch = (event.layer_id && event.layer_id.toLowerCase().includes(searchTerm)) ||
-                              (event.defect_type && event.defect_type.toLowerCase().includes(searchTerm));
+        const matchesSearch = event.defect_type && event.defect_type.toLowerCase().includes(searchTerm);
 
         const matchesDefect = defectFilter === 'all' || event.defect_type.toLowerCase().includes(defectFilter);
 
@@ -781,16 +779,15 @@ function exportFilteredCSV() {
 
     let csvContent = "\uFEFF"; 
     csvContent += 'PrintGuard System Export\n\n';
-    csvContent += 'Timestamp,Printer Name,Defect Type,Confidence Score,Layer ID\n';
+    csvContent += 'Timestamp,Printer Name,Defect Type,Confidence Score\n';
 
     currentFilteredEvents.forEach(event => {
         const timestamp = event.timestamp ? event.timestamp.replace('T', ' ').split('.')[0] : "Unknown Time";
         const printerName = "Unit 01-Alpha"; 
         const defectType = event.defect_type ? event.defect_type : "Unknown Defect";
         const confidence = event.confidence !== null ? `${(event.confidence * 100).toFixed(1)}%` : "N/A";
-        const layerId = event.layer_id ? event.layer_id : "-";
 
-        csvContent += `"${timestamp}","${printerName}","${defectType}","${confidence}","${layerId}"\n`;
+        csvContent += `"${timestamp}","${printerName}","${defectType}","${confidence}"\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
