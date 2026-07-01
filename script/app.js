@@ -738,14 +738,11 @@ function renderHistoryTable(eventsToRender) {
 
 // The filter function that is activated every time something is changed
 function applyFilters() {
-    const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
     const defectFilter = document.getElementById('filter-defect')?.value || 'all';
     const confFilter = document.getElementById('filter-confidence')?.value || 'all';
     const timeFilter = document.getElementById('filter-time')?.value || 'all';
 
     currentFilteredEvents = allHistoryEvents.filter(event => {
-        const matchesSearch = event.defect_type && event.defect_type.toLowerCase().includes(searchTerm);
-
         const matchesDefect = defectFilter === 'all' || event.defect_type.toLowerCase().includes(defectFilter);
 
         const confPercent = event.confidence * 100;
@@ -764,7 +761,7 @@ function applyFilters() {
             if (timeFilter === '7d') matchesTime = diffHours <= (24 * 7);
         }
 
-        return matchesSearch && matchesDefect && matchesConf && matchesTime;
+        return matchesDefect && matchesConf && matchesTime;
     });
 
     renderHistoryTable(currentFilteredEvents);
@@ -806,12 +803,10 @@ function exportFilteredCSV() {
 document.addEventListener('DOMContentLoaded', () => {
     loadHistoryTable();
 
-    const searchInput = document.getElementById('search-input');
     const filterDefect = document.getElementById('filter-defect');
     const filterConf = document.getElementById('filter-confidence');
     const filterTime = document.getElementById('filter-time');
 
-    if(searchInput) searchInput.addEventListener('input', applyFilters); 
     if(filterDefect) filterDefect.addEventListener('change', applyFilters); 
     if(filterConf) filterConf.addEventListener('change', applyFilters);
     if(filterTime) filterTime.addEventListener('change', applyFilters);
