@@ -179,22 +179,26 @@ if (tableRows.length > 0) {
     });
 }
 
-// 2. Refresh button animation
-const allButtons = Array.from(document.querySelectorAll('button'));
-const refreshBtn = allButtons.find(btn => {
-    const icon = btn.querySelector('span[data-icon="refresh"]');
-    return icon !== null;
-});
+// 2. Refresh button 
+const refreshBtn = document.getElementById('refresh-history-btn');
 
 if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
+    refreshBtn.addEventListener('click', async () => {
         const icon = refreshBtn.querySelector('span');
         if(icon) {
-            icon.style.transition = 'transform 0.5s ease';
-            icon.style.transform = 'rotate(360deg)';
-            setTimeout(() => {
-                icon.style.transform = 'rotate(0deg)';
-                alert('Data updated successfully');
+            icon.classList.add('animate-spin');
+        }
+        try{
+            // Pulling the updated data from the database
+            await loadHistoryTable();
+        } catch(error){
+            console.error("Error refreshing data:", error);
+        }finally{
+            // Stopping the animation after the data has loaded
+          setTimeout(() => {
+                if(icon) {
+                    icon.classList.remove('animate-spin');
+                }
             }, 500);
         }
     });
