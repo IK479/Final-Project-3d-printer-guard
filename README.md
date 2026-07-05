@@ -1,7 +1,6 @@
 
 
-https://github.com/user-attachments/assets/050f1d17-e74e-4a05-b8a8-15eea77b66a7
-
+https://github.com/user-attachments/assets/0afb983c-44a3-4230-bac7-7b8ac427039a
 
 
 # PrintGuard: AI-Based Real-Time Defect Detection on Raspberry Pi
